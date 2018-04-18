@@ -8,12 +8,17 @@
     <property name="src" location="src"/>
     <property name="build" location="build"/>
     <property name="dist" location="dist"/>
+    <property name="doc" location="doc"/>
 
-    <target name="init">
-        <mkdir dir="${build}"/>
+    <target name="init"/>
+
+    <target name="doc" depends="init">
+        <mkdir dir="${doc}"/>
+        <javadoc sourcepath="${src}" destdir="${doc}"/>
     </target>
 
     <target name="compile" depends="init">
+        <mkdir dir="${build}"/>
         <javac srcdir="${src}" destdir="${build}" includeantruntime="false"/>
     </target>
 
@@ -26,8 +31,11 @@
         </jar>
     </target>
 
+    <target name="all" depends="dist,doc"/>
+
     <target name="clean">
         <delete dir="${build}"/>
         <delete dir="${dist}"/>
+        <delete dir="${doc}"/>
     </target>
 </project>
