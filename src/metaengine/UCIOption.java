@@ -13,20 +13,22 @@ public class UCIOption {
         STRING
     }
 
+    private static final Value VAL_NONE = new Value();
 
     private String name = "";
     private Type type = Type.NONE;
-    private Value minVal = null;
-    private Value maxVal = null;
-    private Value defaultVal = null;
+    private Value minVal = Value.VAL_NONE;
+    private Value maxVal = Value.VAL_NONE;
+    private Value defaultVal = Value.VAL_NONE;
     private List<Value> vars = new ArrayList<Value>();
-    private Value.Type valueType = Value.Type.NONE;
+    private Value currentVal = Value.VAL_NONE;
 
     private static enum State {
         NONE, NAME, TYPE, DEFAULT, MIN, MAX, VAR
     }
 
     public static class Value {
+        public static final Value VAL_NONE = new Value();
         public static enum Type {
             BOOLEAN,
             STRING,
@@ -42,11 +44,12 @@ public class UCIOption {
          */
         public Value () { }
         /**
-         * If the first argument is {@code null},
+         * If the first argument is {@code Value.VAL_NONE},
          * this consructor creates a value {@code UCIOption.Value} object
          * holding the type indicated by {@code type} with an appropriate
          * conversion of {@code rep}.
-         * If the first argument is not null, this constructor creates
+         * If the first argument is not {@code Value.VAL_NONE},
+         * this constructor creates
          * a value that combines the value in old with the value indicated
          * by the other arguments.
          */
@@ -57,7 +60,7 @@ public class UCIOption {
                 val = new Boolean(rep);
                 break;
             case STRING:
-                if (old != null && old.type == Type.STRING) {
+                if (!old.equals(VAL_NONE) && old.type == Type.STRING) {
                     val = (String)old.val + " " + rep;
                 } else {
                     val = rep;
@@ -68,12 +71,45 @@ public class UCIOption {
                 break;
             }
         }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other == null) {
+                return false;
+            }
+            if (!Value.class.isAssignableFrom(other.getClass())) {
+                return false;
+            }
+
+            Value theOther = (Value)other;
+
+            if (type == theOther.type) {
+                int nullCount = 0;
+                if (val == null) {
+                    ++nullCount;
+                }
+                if (theOther.val == null) {
+                    ++nullCount;
+                }
+                switch (nullCount) {
+                case 0:
+                    return val.equals(theOther.val);
+                case 1:
+                    return false;
+                default:
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        }
+
         /**
          * This constructor behaves as if the {@code (Value, String, Type)}
-         * constructor were called with a first argument {@code null}.
+         * constructor were called with a first argument {@code Value.VAL_NONE}.
          */
         public Value(String rep, Type type) {
-            this(null, rep, type);
+            this(VAL_NONE, rep, type);
         }
         public Value(String str) {
             type = Type.STRING;
@@ -99,10 +135,20 @@ public class UCIOption {
         public boolean asBoolean() {
             return (Boolean)val;
         }
+
+        @Override
+        public String toString() {
+            if (type == Type.NONE) {
+                return "";
+            } else {
+                return val.toString();
+            }
+        }
     }
 
     public UCIOption(List<String> optionTokens) {
         State st = State.NONE;
+        Value.Type valueType = Value.Type.NONE;
         int varIndex = 0;
         for (String token : optionTokens) {
             switch (token) {
@@ -188,6 +234,41 @@ public class UCIOption {
                 break;
             // case BUTTON: valueType is already NONE;
             }
+        }
+
+        currentVal = defaultVal;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Value getValue() {
+        return currentVal;
+    }
+
+    public Value getMinValue() {
+        return minVal;
+    }
+
+    public Value getMaxValue() {
+        return maxVal;
+    }
+
+    public List<Value> getVarValues() {
+        return vars;
+    }
+
+    public void setValue(Value val) {
+        currentVal = val;
+    }
+
+    public String getSetoptionString() {
+        Value theVal = getValue();
+        if (theVal.getType() != Value.Type.NONE) {
+            return "setoption name " + name + " value " + theVal.toString();
+        } else {
+            return "setoption name " + name;
         }
     }
 }
