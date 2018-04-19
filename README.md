@@ -8,7 +8,6 @@ alpha-beta search engine.
 To build and run this application, you should have at least version 1.8 of
 of the Java Development Kit and a reasonably new version of Apache Ant.
 
-Build with the command `ant`.
-This should give you an executable jar in the `dist` subdirectory. This jar
-can be run (from the same directory as the jar) as a UCI engine
-with `java -jar MetaEngine.jar`.
+Build with the command `mvn package`.
+This should give you an executable jar in the `dist` subdirectory. This should
+create an executable jar in `target/`.
