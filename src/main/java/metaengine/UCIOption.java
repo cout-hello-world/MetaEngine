@@ -259,8 +259,36 @@ public class UCIOption {
         return vars;
     }
 
+    public Value getDefaultValue() {
+        return defaultVal;
+    }
+
     public void setValue(Value val) {
         currentVal = val;
+    }
+
+    public String getOptionString(String namePrefix) {
+        String retVal = "option name " + namePrefix + name;
+        String typeStr = type.name().toLowerCase();
+        retVal += " type " + typeStr;
+        if (!getDefaultValue().equals(Value.VAL_NONE)) {
+            retVal += " min " + getMinValue().toString();
+        }
+        if (!getMinValue().equals(Value.VAL_NONE)) {
+            retVal += " min " + getMinValue().toString();
+        }
+        if (!getMaxValue().equals(Value.VAL_NONE)) {
+            retVal += " max " + getMaxValue().toString();
+        }
+        for (Value v : vars) {
+            retVal += " var " + v.toString();
+        }
+
+        return retVal;
+    }
+
+    public String getOptionString() {
+        return getOptionString("");
     }
 
     public String getSetoptionString() {

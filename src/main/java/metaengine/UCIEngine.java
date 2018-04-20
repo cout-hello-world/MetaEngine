@@ -17,16 +17,17 @@ public class UCIEngine {
     private final BufferedReader fromEngine;
     private final PrintWriter toEngine;
     private final String enginePath;
+    private List<UCIOption> options = null;
 
-    public UCIEngine (File pathToEngine, List<String> arguments)
+    private static final String NULL_READLINE_MESSAGE =
+        "Unexpected EOF when reading from engine";
+
+    // All constructors should ultimatly delagate to this one.
+    private UCIEngine (List<String> argv)
             throws IOException {
-        ArrayList<String> argv = new ArrayList<String>();
-        enginePath = pathToEngine.getAbsolutePath();
-        argv.add(enginePath);
-        for (String str : arguments) {
-            argv.add(str);
-        }
-
+        // It is okay to use argv without copying because the ProcessBuilder
+        // is not maintained after this call.
+        enginePath = argv.get(0);
         ProcessBuilder pb = new ProcessBuilder(argv);
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         engineProcess = pb.start();
@@ -36,24 +37,50 @@ public class UCIEngine {
         toEngine =
             new PrintWriter(new BufferedWriter(
               new OutputStreamWriter(engineProcess.getOutputStream())), true);
+        populateOptions();
+    }
+
+    private static List<String> fileToArgv(File file) {
+        List<String> argv = new ArrayList<String>();
+        argv.add(file.getAbsolutePath());
+        return argv;
     }
 
     public UCIEngine(File pathToEngine) throws IOException {
-        this(pathToEngine, new ArrayList<String>());
+        this(fileToArgv(pathToEngine));
     }
 
-    // FIXME
-    List<UCIOption> getOptions() throws IOException {
-        List<UCIOption> options = new ArrayList<UCIOption>();
+    private static List<String> stringsToList(String engine, String... args) {
+        List<String> argv = new ArrayList<String>();
+        argv.add(engine);
+        for (String str : args) {
+            argv.add(str);
+        }
+        return argv;
+    }
+
+    public UCIEngine(String engine, String... args) throws IOException {
+        this(stringsToList(engine, args));
+    }
+
+    public List<UCIOption> getOptions() {
+        return options;
+    }
+
+    // This should only be called once at the end of the constructor.
+    private void populateOptions() throws IOException {
+        options = new ArrayList<UCIOption>();
         toEngine.println("uci");
         String line = "";
-        while (!line.equals("uciok")) {
+        while (true) {
             line = fromEngine.readLine();
             if (line == null) {
-                // Consider using custom exception class.
-                throw new IOException("Early EOF in engine output");
+                throw new IOException(NULL_READLINE_MESSAGE);
             }
             String[] tokens = UCIUtils.tokenize(line);
+            if (tokens.length != 0 && tokens[0].equals("uciok")) {
+                break;
+            }
             List<String> tokensList = new ArrayList<String>();
             if (tokens.length != 0 && tokens[0].equals("option")) {
                 for (int i = 1; i != tokens.length; ++i) {
@@ -62,7 +89,27 @@ public class UCIEngine {
                 options.add(new UCIOption(tokensList));
             }
         }
+    }
 
-        return options;
+    public void sendOptionsAndWait(List<UCIOption> opts) throws IOException {
+        for (UCIOption opt : opts) {
+            toEngine.println(opt.getSetoptionString());
+        }
+        toEngine.println("isready");
+        String response = "";
+        while (true) {
+            response = fromEngine.readLine();
+            if (response == null) {
+                throw new IOException(NULL_READLINE_MESSAGE);
+            }
+            String[] tokens = UCIUtils.tokenize(response);
+            if (tokens.length != 0 && tokens[0].equals("readyok")) {
+                break;
+            }
+        }
+    }
+
+    public void quit() {
+        toEngine.println("quit");
     }
 }
