@@ -272,7 +272,7 @@ public class UCIOption {
         String typeStr = type.name().toLowerCase();
         retVal += " type " + typeStr;
         if (!getDefaultValue().equals(Value.VAL_NONE)) {
-            retVal += " min " + getMinValue().toString();
+            retVal += " default " + getDefaultValue().toString();
         }
         if (!getMinValue().equals(Value.VAL_NONE)) {
             retVal += " min " + getMinValue().toString();

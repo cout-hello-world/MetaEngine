@@ -95,6 +95,14 @@ public class UCIEngine {
         for (UCIOption opt : opts) {
             toEngine.println(opt.getSetoptionString());
         }
+        synchronize();
+    }
+
+    public void sendUcinewgame() {
+        toEngine.println("ucinewgame");
+    }
+
+    public void synchronize() throws IOException {
         toEngine.println("isready");
         String response = "";
         while (true) {
@@ -109,7 +117,7 @@ public class UCIEngine {
         }
     }
 
-    public void quit() {
+    public void quit() throws IOException {
         toEngine.println("quit");
     }
 }
