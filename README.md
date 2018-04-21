@@ -8,5 +8,5 @@ alpha-beta search engine.
 To build and run this application, you should have at least version 1.8 of
 of the Java Development Kit and a reasonably new version of Apache Ant.
 
-Build with the command `mvn package`. This should
-create an executable jar in `target/`.
+Build with the command `ant`. This should
+create an executable jar in the `target` directory.

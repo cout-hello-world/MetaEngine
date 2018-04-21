@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns:ivy="antlib:org.apache.ivy.ant"
+  name="MetaEngine" default="jar">
+    <property name="version" value="0.1.0-SNAPSHOT"/>
+    <property name="package" value="metaengine"/>
+    <property name="src" location="src"/>
+    <property name="target" location="target"/>
+    <property name="main-src" location="${src}/main/java"/>
+    <property name="test-src" location="${src}/test/java"/>
+    <property name="main-target" location="${target}/classes"/>
+    <property name="test-target" location="${target}/test-classes"/>
+    <property name="jar" location="target/${ant.project.name}-${version}.jar"/>
+    <property name="main-class" value="${package}.Main"/>
+    <property name="reports" location="${target}/reports"/>
+    <property name="lib" location="${target}/lib"/>
+    <property name="temp" location="${target}/temp"/>
+
+    <target name="compile">
+        <mkdir dir="${main-target}"/>
+        <javac includeantruntime="false"
+          srcdir="${main-src}" destdir="${main-target}"/>
+    </target>
+
+    <target name="jar" depends="compile">
+        <jar jarfile="${jar}" basedir="${main-target}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="resolve">
+        <echo message="Resolving ivy dependencies..."/>
+        <ivy:retrieve pattern="${lib}/[conf]/[artifact]-[revision].[ext]"/>
+        <ivy:cachepath pathid="test-dep-path" conf="test"/>
+    </target>
+
+    <target name="test-compile" depends="compile,resolve">
+        <mkdir dir="${test-target}"/>
+        <javac includeantruntime="false"
+          srcdir="${test-src}" destdir="${test-target}">
+            <classpath location="${main-target}"/>
+            <classpath refid="test-dep-path"/>
+        </javac>
+    </target>
+
+    <target name="test" depends="test-compile">
+        <mkdir dir="${reports}"/>
+        <mkdir dir="${temp}"/>
+        <junit printsummary="yes" haltonfailure="no" tempdir="${temp}">
+            <classpath location="${main-target}"/>
+            <classpath location="${test-target}"/>
+            <classpath refid="test-dep-path"/>
+
+            <formatter type="plain"/>
+            <batchtest fork="yes" todir="${reports}">
+                <fileset dir="${test-src}">
+                    <include name="**/*Test*.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    <delete dir="${temp}"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="target"/>
+    </target>
+</project>
