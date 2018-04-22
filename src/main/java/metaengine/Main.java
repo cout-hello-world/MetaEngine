@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.io.PrintStream;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -12,9 +15,14 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 public class Main {
+
+    private static ThreadPool mainPool = new ThreadPool();
+
     public static void main(String[] args)
+      // TODO: Real exception handling
       throws ParserConfigurationException, IOException,
-             InvalidConfigurationException {
+             InvalidConfigurationException, InterruptedException,
+             ExecutionException {
         if (args.length != 1) {
             printHelp(System.err);
             System.exit(1);
@@ -54,18 +62,28 @@ public class Main {
             System.out.println();
         }*/
 
+        List<Future<UCIEngine>> futureEngines =
+          new ArrayList<Future<UCIEngine>>();
+        for (List<String> argsList : listOfArgLists) {
+            Callable<UCIEngine> constructEngine = () -> {
+                return new UCIEngine(argsList);
+            };
+            mainPool.submit(constructEngine);
+        }
+
         List<UCIEngine> engines = new ArrayList<UCIEngine>();
-        for (List<String> engineArgs : listOfArgLists) {
-            engines.add(new UCIEngine(engineArgs));
+        for (Future<UCIEngine> future : futureEngines) {
+            engines.add(future.get());
         }
 
         for (UCIEngine engine : engines) {
-            System.out.println(engine.getInvokedName());
-            List<UCIOption> options = engine.getOptions();
-            for (UCIOption opt : options) {
+            System.out.println("Name: " + engine.getInvokedName());
+            System.out.println("uid: " + engine.getUniqueId());
+            for (UCIOption opt : engine.getOptions()) {
                 System.out.println(opt.getOptionString());
                 System.out.println(opt.getSetoptionString());
             }
+            System.out.println();
             engine.quit();
         }
     }

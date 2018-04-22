@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config>
     <engines>
-        <engine exe="stockfish" copies="2"/>
+        <engine exe="stockfish"/>
         <engine exe="gnuchess">
             <args>
                 <arg>--uci</arg>
