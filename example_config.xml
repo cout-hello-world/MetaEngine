@@ -7,8 +7,6 @@
                 <arg>--uci</arg>
             </args>
         </engine>
-        <engine exe="stockfish" copies="100000">
-            <args><arg>foo</arg><arg>bar</arg></args>
-        </engine>
+        <engine exe="fruit"/>
     </engines>
 </config>

@@ -13,7 +13,7 @@ import org.xml.sax.SAXException;
 
 public class Main {
     public static void main(String[] args)
-      throws ParserConfigurationException,
+      throws ParserConfigurationException, IOException,
              InvalidConfigurationException {
         if (args.length != 1) {
             printHelp(System.err);
@@ -43,14 +43,30 @@ public class Main {
             return;
         }
 
-        List<List<String>> arguments =
+        List<List<String>> listOfArgLists =
           Configuration.newConfigurationFromDocument(doc)
             .getUnmodifiableEngineArguments();
+        /*
         for (List<String> engineArgs : arguments) {
             for (String arg : engineArgs) {
                 System.out.println(arg);
             }
             System.out.println();
+        }*/
+
+        List<UCIEngine> engines = new ArrayList<UCIEngine>();
+        for (List<String> engineArgs : listOfArgLists) {
+            engines.add(new UCIEngine(engineArgs));
+        }
+
+        for (UCIEngine engine : engines) {
+            System.out.println(engine.getInvokedName());
+            List<UCIOption> options = engine.getOptions();
+            for (UCIOption opt : options) {
+                System.out.println(opt.getOptionString());
+                System.out.println(opt.getSetoptionString());
+            }
+            engine.quit();
         }
     }
 
