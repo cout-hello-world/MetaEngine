@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project xmlns:ivy="antlib:org.apache.ivy.ant"
   name="MetaEngine" default="jar">
+    <property name="debug" value="true"/>
     <property name="version" value="0.1.0-SNAPSHOT"/>
     <property name="package" value="metaengine"/>
     <property name="src" location="src"/>
@@ -14,11 +15,17 @@
     <property name="reports" location="${target}/reports"/>
     <property name="lib" location="${target}/lib"/>
     <property name="temp" location="${target}/temp"/>
+    <property name="doc-target" location="${target}/site/apidocs"/>
+
+    <target name="doc">
+        <mkdir dir="${doc-target}"/>
+        <javadoc sourcepath="${main-src}" destdir="${doc-target}"/>
+    </target>
 
     <target name="compile">
         <mkdir dir="${main-target}"/>
         <javac includeantruntime="false"
-          srcdir="${main-src}" destdir="${main-target}"/>
+          srcdir="${main-src}" destdir="${main-target}" debug="${debug}"/>
     </target>
 
     <target name="jar" depends="compile">
@@ -30,7 +37,6 @@
     </target>
 
     <target name="resolve">
-        <echo message="Resolving ivy dependencies..."/>
         <ivy:retrieve pattern="${lib}/[conf]/[artifact]-[revision].[ext]"/>
         <ivy:cachepath pathid="test-dep-path" conf="test"/>
     </target>
@@ -38,7 +44,7 @@
     <target name="test-compile" depends="compile,resolve">
         <mkdir dir="${test-target}"/>
         <javac includeantruntime="false"
-          srcdir="${test-src}" destdir="${test-target}">
+          srcdir="${test-src}" destdir="${test-target}" debug="${debug}">
             <classpath location="${main-target}"/>
             <classpath refid="test-dep-path"/>
         </javac>
@@ -61,6 +67,8 @@
         </junit>
     <delete dir="${temp}"/>
     </target>
+
+    <target name="all" depends="doc,test,jar"/>
 
     <target name="clean">
         <delete dir="target"/>

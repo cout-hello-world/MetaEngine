@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <engines>
+        <engine exe="stockfish" copies="2"/>
+        <engine exe="gnuchess">
+            <args>
+                <arg>--uci</arg>
+            </args>
+        </engine>
+        <engine exe="stockfish" copies="100000">
+            <args><arg>foo</arg><arg>bar</arg></args>
+        </engine>
+    </engines>
+</config>
