@@ -1,0 +1,6 @@
+Ideas:
+
+- EngineManeger class to hold associated configuration for engine.
+- TimeManager class with possible engine implementation.
+- Concurrent engine initialization.
+- Comparitive analysis of a/b and neural moves.
