@@ -71,19 +71,13 @@ public class UCIEnginesManager {
         enginesList = toManage;
     }
 
-    /*
-     * TODO: Redesign to return semantic type
-     */
-    public List<String> getUCIOptions() {
-        List<String> ret = new ArrayList<String>();
+    public List<UCIOptionBundle> getUCIOptions() {
+        List<UCIOptionBundle> ret = new ArrayList<UCIOptionBundle>();
         for (EngineRecord rec : enginesList) {
-            List<UCIOption> optionsForEngine = rec.getEngine().getOptions();
-            for (UCIOption opt : optionsForEngine) {
-                ret.add(opt.getOptionString(rec.getEngine().getInvokedName()
-                        + " " + rec.getIndex() + " "));
-            }
+            UCIEngine engine = rec.getEngine();
+            ret.add(new UCIOptionBundle(engine.getOptions(),
+              engine.getInvokedName(), rec.index));
         }
-
         return ret;
     }
 

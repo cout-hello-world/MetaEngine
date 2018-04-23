@@ -18,9 +18,14 @@ public class UCI {
     }
 
     private void printEngineOptions(PrintStream out) {
-        List<String> options = engines.getUCIOptions();
-        for (String s : options) {
-            out.println(s);
+        List<UCIOptionBundle> optionBundles = engines.getUCIOptions();
+        for (UCIOptionBundle bundle : optionBundles) {
+            String name = bundle.getName();
+            int index = bundle.getIndex();
+            List<UCIOption> options = bundle.getOptions();
+            for (UCIOption option : options) {
+                out.println(option.getOptionString(name + " " + index + " "));
+            }
         }
     }
 
