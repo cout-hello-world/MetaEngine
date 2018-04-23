@@ -4,3 +4,6 @@ Ideas:
 - TimeManager class with possible engine implementation.
 - Concurrent engine initialization.
 - Comparitive analysis of a/b and neural moves.
+
+
+- Use UCIOptionBundle to return an engine name/index + associated options.

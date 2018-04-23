@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.PrintStream;
 
+import java.util.List;
+
 public class UCI {
     private final UCIEnginesManager engines;
     public UCI(UCIEnginesManager engines) {
@@ -13,6 +15,13 @@ public class UCI {
 
     private static enum State {
         BEFORE_UCI, AFTER_UCI
+    }
+
+    private void printEngineOptions(PrintStream out) {
+        List<String> options = engines.getUCIOptions();
+        for (String s : options) {
+            out.println(s);
+        }
     }
 
     /**
@@ -42,6 +51,7 @@ public class UCI {
             switch (state) {
             case BEFORE_UCI:
                 if (cmd.equals("uci")) {
+                    printEngineOptions(out);
                     out.println("uciok");
                     state = State.AFTER_UCI;
                 }

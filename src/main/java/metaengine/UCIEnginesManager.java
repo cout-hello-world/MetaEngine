@@ -59,12 +59,32 @@ public class UCIEnginesManager {
         public UCIEngine getEngine() {
             return engine;
         }
+
+        public int getIndex() {
+            return index;
+        }
     }
 
     private final List<EngineRecord> enginesList;
 
     private UCIEnginesManager(List<EngineRecord> toManage) {
         enginesList = toManage;
+    }
+
+    /*
+     * TODO: Redesign to return semantic type
+     */
+    public List<String> getUCIOptions() {
+        List<String> ret = new ArrayList<String>();
+        for (EngineRecord rec : enginesList) {
+            List<UCIOption> optionsForEngine = rec.getEngine().getOptions();
+            for (UCIOption opt : optionsForEngine) {
+                ret.add(opt.getOptionString(rec.getEngine().getInvokedName()
+                        + " " + rec.getIndex() + " "));
+            }
+        }
+
+        return ret;
     }
 
     public void quitAll() throws IOException {
