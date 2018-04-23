@@ -51,6 +51,7 @@ public class Main {
           Configuration.newConfigurationFromDocument(doc);
         UCIEnginesManager engines = UCIEnginesManager.create(configuration);
 
+        System.exit(new UCI(engines).loop());
     }
 
     private static void printHelp(PrintStream out) {

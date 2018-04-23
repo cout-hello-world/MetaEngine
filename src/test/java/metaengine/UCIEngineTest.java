@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class UCIEngineTest {
-    @Test(timeout=1000)
+    @Test(timeout=2000)
     public void uciEngineShouldConstructQuickly() throws IOException
     {
         UCIEngine engine = new UCIEngine("stockfish");

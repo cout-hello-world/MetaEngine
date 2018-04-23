@@ -36,6 +36,8 @@
         <jar jarfile="${jar}" basedir="${main-target}">
             <manifest>
                 <attribute name="Main-Class" value="${main-class}"/>
+                <attribute name="Package-Title" value="${ant.project.name}"/>
+                <attribute name="Package-Version" value="${version}"/>
             </manifest>
         </jar>
     </target>

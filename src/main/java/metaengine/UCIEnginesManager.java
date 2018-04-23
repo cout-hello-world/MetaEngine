@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import java.io.IOException;
+
 public class UCIEnginesManager {
     public static UCIEnginesManager create(Configuration conf) {
         try { // FIXME: Use real exception handling
@@ -33,17 +35,6 @@ public class UCIEnginesManager {
         List<EngineRecord> engines = new ArrayList<EngineRecord>();
         for (Future<EngineRecord> future : futureEngines) {
             engines.add(future.get());
-        }
-
-        for (EngineRecord engineRecord : engines) {
-            UCIEngine engine = engineRecord.getEngine();
-            System.out.println("Name: " + engine.getInvokedName());
-            for (UCIOption opt : engine.getOptions()) {
-                System.out.println(opt.getOptionString());
-                System.out.println(opt.getSetoptionString());
-            }
-            engine.quit();
-            System.out.println();
         }
 
         pool.shutdown();
@@ -74,5 +65,11 @@ public class UCIEnginesManager {
 
     private UCIEnginesManager(List<EngineRecord> toManage) {
         enginesList = toManage;
+    }
+
+    public void quitAll() throws IOException {
+        for (EngineRecord rec : enginesList) {
+            rec.getEngine().quit();
+        }
     }
 }
