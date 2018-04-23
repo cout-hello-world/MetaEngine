@@ -16,6 +16,7 @@
     <property name="lib" location="${target}/lib"/>
     <property name="temp" location="${target}/temp"/>
     <property name="doc-target" location="${target}/site/apidocs"/>
+    <property name="depcache" location="${target}/depcache"/>
 
     <target name="doc">
         <mkdir dir="${doc-target}"/>
@@ -24,6 +25,9 @@
 
     <target name="compile">
         <mkdir dir="${main-target}"/>
+        <mkdir dir="${depcache}"/>
+        <depend srcdir="${main-src}" destdir="${main-target}" closure="true"
+          cache="${depcache}"/>
         <javac includeantruntime="false"
           srcdir="${main-src}" destdir="${main-target}" debug="${debug}"/>
     </target>
@@ -43,6 +47,8 @@
 
     <target name="test-compile" depends="compile,resolve">
         <mkdir dir="${test-target}"/>
+        <depend srcdir="${test-src}" destdir="${test-target}"
+          classpath="${main-target}" closure="true" cache="${depcache}"/>
         <javac includeantruntime="false"
           srcdir="${test-src}" destdir="${test-target}" debug="${debug}">
             <classpath location="${main-target}"/>

@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -19,9 +18,6 @@ public class UCIEngine {
     private final PrintWriter toEngine;
     private final String enginePath;
     private List<UCIOption> options = null;
-    private final int uid;
-
-    private static final AtomicInteger uidCounter = new AtomicInteger(-1);
 
     private static final String NULL_READLINE_MESSAGE =
         "Unexpected EOF when reading from engine";
@@ -42,8 +38,6 @@ public class UCIEngine {
             new PrintWriter(new BufferedWriter(
               new OutputStreamWriter(engineProcess.getOutputStream())), true);
         populateOptions();
-
-        uid = uidCounter.incrementAndGet();
     }
 
     private static List<String> fileToArgv(File file) {
@@ -63,10 +57,6 @@ public class UCIEngine {
             argv.add(str);
         }
         return argv;
-    }
-
-    public int getUniqueId() {
-        return uid;
     }
 
     public String getInvokedName() {

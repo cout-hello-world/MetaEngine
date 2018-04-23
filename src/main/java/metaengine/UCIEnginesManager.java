@@ -38,7 +38,6 @@ public class UCIEnginesManager {
         for (EngineRecord engineRecord : engines) {
             UCIEngine engine = engineRecord.getEngine();
             System.out.println("Name: " + engine.getInvokedName());
-            System.out.println("uid: " + engine.getUniqueId());
             for (UCIOption opt : engine.getOptions()) {
                 System.out.println(opt.getOptionString());
                 System.out.println(opt.getSetoptionString());
