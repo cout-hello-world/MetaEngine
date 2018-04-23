@@ -18,21 +18,25 @@ public class UCIEnginesManager {
         List<List<String>> listOfArgLists =
           conf.getUnmodifiableEngineArguments();
 
-        List<Future<UCIEngine>> futureEngines =
-          new ArrayList<Future<UCIEngine>>();
+        List<Future<EngineRecord>> futureEngines =
+          new ArrayList<Future<EngineRecord>>();
+        int idx = 0;
         for (List<String> argsList : listOfArgLists) {
-            Callable<UCIEngine> constructEngine = () -> {
-                return new UCIEngine(argsList);
+            int tempIdx = idx;
+            Callable<EngineRecord> constructEngine = () -> {
+                return new EngineRecord(new UCIEngine(argsList), tempIdx);
             };
             futureEngines.add(pool.submit(constructEngine));
+            ++idx;
         }
 
-        List<UCIEngine> engines = new ArrayList<UCIEngine>();
-        for (Future<UCIEngine> future : futureEngines) {
+        List<EngineRecord> engines = new ArrayList<EngineRecord>();
+        for (Future<EngineRecord> future : futureEngines) {
             engines.add(future.get());
         }
 
-        for (UCIEngine engine : engines) {
+        for (EngineRecord engineRecord : engines) {
+            UCIEngine engine = engineRecord.getEngine();
             System.out.println("Name: " + engine.getInvokedName());
             System.out.println("uid: " + engine.getUniqueId());
             for (UCIOption opt : engine.getOptions()) {
@@ -54,9 +58,22 @@ public class UCIEnginesManager {
         }
     }
 
-    private final List<UCIEngine> enginesList;
+    private static class EngineRecord {
+        private final UCIEngine engine;
+        private final int index;
+        public EngineRecord(UCIEngine engine, int idx) {
+            this.engine = engine;
+            index = idx;
+        }
 
-    private UCIEnginesManager(List<UCIEngine> toManage) {
+        public UCIEngine getEngine() {
+            return engine;
+        }
+    }
+
+    private final List<EngineRecord> enginesList;
+
+    private UCIEnginesManager(List<EngineRecord> toManage) {
         enginesList = toManage;
     }
 }
