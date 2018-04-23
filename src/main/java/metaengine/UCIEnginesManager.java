@@ -76,7 +76,7 @@ public class UCIEnginesManager {
         for (EngineRecord rec : enginesList) {
             UCIEngine engine = rec.getEngine();
             ret.add(new UCIOptionBundle(engine.getOptions(),
-              engine.getInvokedName(), rec.index));
+              engine.getName(), rec.index));
         }
         return ret;
     }

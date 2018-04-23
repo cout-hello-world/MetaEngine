@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import java.nio.file.Paths;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -16,7 +18,7 @@ public class UCIEngine {
     private final Process engineProcess;
     private final BufferedReader fromEngine;
     private final PrintWriter toEngine;
-    private final String enginePath;
+    private final String engineName;
     private List<UCIOption> options = null;
 
     private static final String NULL_READLINE_MESSAGE =
@@ -27,7 +29,8 @@ public class UCIEngine {
             throws IOException {
         // It is okay to use argv without copying because the ProcessBuilder
         // is not maintained after this call.
-        enginePath = argv.get(0);
+        engineName = Paths.get(argv.get(0)).getFileName().toString()
+                     .replaceAll("\\s", "");
         ProcessBuilder pb = new ProcessBuilder(argv);
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         engineProcess = pb.start();
@@ -59,8 +62,11 @@ public class UCIEngine {
         return argv;
     }
 
-    public String getInvokedName() {
-        return enginePath;
+    /**
+     * @return A whitespace-free string representing the name of this engine
+     */
+    public String getName() {
+        return engineName;
     }
 
     public UCIEngine(String engine, String... args) throws IOException {
