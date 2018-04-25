@@ -243,6 +243,10 @@ public class UCIOption {
         return name;
     }
 
+    public Value.Type getValueType() {
+        return getValue().getType();
+    }
+
     public Value getValue() {
         return currentVal;
     }

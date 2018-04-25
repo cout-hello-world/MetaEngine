@@ -101,11 +101,8 @@ public class UCIEngine {
         }
     }
 
-    public void sendOptionsAndWait(List<UCIOption> opts) throws IOException {
-        for (UCIOption opt : opts) {
-            toEngine.println(opt.getSetoptionString());
-        }
-        synchronize();
+    public void sendOption(UCIOption opt) throws IOException {
+        toEngine.println(opt.getSetoptionString());
     }
 
     public void sendUcinewgame() {

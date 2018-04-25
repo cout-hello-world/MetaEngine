@@ -81,6 +81,29 @@ public class UCIEnginesManager {
         return ret;
     }
 
+    public void dispatchOption(SetoptionInfo setoptionInfo) throws IOException {
+        for (EngineRecord rec : enginesList) {
+            if (rec.getIndex() == setoptionInfo.getEngineIndex()) {
+                List<UCIOption> opts = rec.getEngine().getOptions();
+                for (UCIOption opt : opts) {
+                    if (opt.getName().equals(setoptionInfo.getNameString())) {
+                        UCIOption.Value val =
+                          new UCIOption.Value(setoptionInfo.getValueString(),
+                                              opt.getValueType());
+                        opt.setValue(val);
+                        rec.getEngine().sendOption(opt);
+                    }
+                }
+            }
+        }
+    }
+
+    public void synchronizeAll() throws IOException {
+        for (EngineRecord rec : enginesList) {
+            rec.getEngine().synchronize();
+        }
+    }
+
     public void quitAll() throws IOException {
         for (EngineRecord rec : enginesList) {
             rec.getEngine().quit();

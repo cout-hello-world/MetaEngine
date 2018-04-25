@@ -9,22 +9,23 @@ import java.util.List;
 
 public class UCI {
     private final UCIEnginesManager engines;
+    private final List<UCIOptionBundle> optionBundles;
     public UCI(UCIEnginesManager engines) {
         this.engines = engines;
+        optionBundles = this.engines.getUCIOptions();
     }
 
     private static enum State {
-        BEFORE_UCI, AFTER_UCI
+        BEFORE_UCI, AFTER_UCI, INITIALIZED
     }
 
     private void printEngineOptions(PrintStream out) {
-        List<UCIOptionBundle> optionBundles = engines.getUCIOptions();
         for (UCIOptionBundle bundle : optionBundles) {
             String name = bundle.getName();
             int index = bundle.getIndex();
             List<UCIOption> options = bundle.getOptions();
             for (UCIOption option : options) {
-                out.println(option.getOptionString(name + " " + index + " "));
+                out.println(option.getOptionString(index + " " + name + " "));
             }
         }
     }
@@ -61,7 +62,28 @@ public class UCI {
                     state = State.AFTER_UCI;
                 }
                 break;
-            default:
+            case AFTER_UCI:
+                if (cmd.equals("quit")) {
+                    loop = false;
+                } else if (cmd.equals("setoption")) {
+                    // Assert length?
+                    try {
+                        engines.dispatchOption(new SetoptionInfo(tokens));
+                    } catch (IOException e) {
+                        System.err.println("Error carrying out setoption command");
+                    }
+                } else if (cmd.equals("isready")) {
+                    try {
+                        engines.synchronizeAll();
+                    } catch (IOException e) {
+                        System.err.println("Error initializing engines");
+                        // Consider failure exit here
+                    }
+                    out.println("readyok");
+                    state = State.INITIALIZED;
+                }
+                break;
+            case INITIALIZED:
                 if (cmd.equals("quit")) {
                     loop = false;
                 }
