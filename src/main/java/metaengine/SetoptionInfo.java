@@ -43,12 +43,18 @@ public class SetoptionInfo {
             case IN_NAME_MAIN:
                 if (tokens[i].equals("value")) {
                     st = State.IN_VALUE;
+                } else if (name.equals("")) {
+                    name = tokens[i];
                 } else {
-                    name += tokens[i];
+                    name += " " + tokens[i];
                 }
                 break;
             case IN_VALUE:
-                value += tokens[i];
+                if (value.equals("")) {
+                    value = tokens[i];
+                } else {
+                    value += " " + tokens[i];
+                }
                 break;
             }
         }

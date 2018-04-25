@@ -67,18 +67,10 @@ public class UCI {
                     loop = false;
                 } else if (cmd.equals("setoption")) {
                     // Assert length?
-                    try {
-                        engines.dispatchOption(new SetoptionInfo(tokens));
-                    } catch (IOException e) {
-                        System.err.println("Error carrying out setoption command");
-                    }
+                    System.err.println("in setoption processing");
+                    engines.dispatchOption(new SetoptionInfo(tokens));
                 } else if (cmd.equals("isready")) {
-                    try {
-                        engines.synchronizeAll();
-                    } catch (IOException e) {
-                        System.err.println("Error initializing engines");
-                        // Consider failure exit here
-                    }
+                    engines.synchronizeAll();
                     out.println("readyok");
                     state = State.INITIALIZED;
                 }
@@ -91,12 +83,7 @@ public class UCI {
             }
         }
 
-        try {
-            engines.quitAll();
-        } catch (IOException e) {
-            System.err.println("Error quitting child engines.");
-            return 1;
-        }
+        engines.quitAll();
         return 0;
     }
 }
