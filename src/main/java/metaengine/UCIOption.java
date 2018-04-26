@@ -77,7 +77,7 @@ public class UCIOption {
             if (other == null) {
                 return false;
             }
-            if (!Value.class.isAssignableFrom(other.getClass())) {
+            if (getClass() != other.getClass()) {
                 return false;
             }
 
@@ -103,6 +103,7 @@ public class UCIOption {
                 return false;
             }
         }
+        // TODO: override hashcode.
 
         /**
          * This constructor behaves as if the {@code (Value, String, Type)}
