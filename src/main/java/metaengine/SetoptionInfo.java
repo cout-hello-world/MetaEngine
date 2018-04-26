@@ -9,19 +9,6 @@ public class SetoptionInfo {
         NO_NAME_YET, HAVE_NAME, SLEEPING, IN_NAME_MAIN, IN_VALUE
     }
 
-    private static int tryParseIndex(String str) {
-        int result = -1;
-        try {
-            result = Integer.parseInt(str);
-        } catch (NumberFormatException e) {
-            // Do nothing
-        }
-        if (result < 0) {
-            result = -1;
-        }
-        return result;
-    }
-
     public SetoptionInfo(String[] tokens) {
         State st = State.NO_NAME_YET;
         for (int i = 0; i != tokens.length; ++i) {
@@ -32,7 +19,7 @@ public class SetoptionInfo {
                 }
                 break;
             case HAVE_NAME:
-                idx = tryParseIndex(tokens[i]);
+                idx = UCIUtils.tryParseUnsigned(tokens[i]);
                 if (idx != -1) {
                     st = State.SLEEPING;
                 }
