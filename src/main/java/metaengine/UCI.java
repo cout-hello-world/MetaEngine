@@ -54,6 +54,8 @@ public class UCI {
 
             String cmd = tokens[0];
 
+
+            SearchInfo info = new SearchInfo();
             switch (state) {
             case BEFORE_UCI:
                 if (cmd.equals("uci")) {
@@ -78,6 +80,8 @@ public class UCI {
             case INITIALIZED:
                 if (cmd.equals("quit")) {
                     loop = false;
+                } if (cmd.equals("go")) {
+                    info = engines.search(new UCIGo(tokens));
                 }
                 break;
             }

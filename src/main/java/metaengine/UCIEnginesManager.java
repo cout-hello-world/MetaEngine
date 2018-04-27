@@ -99,6 +99,24 @@ public class UCIEnginesManager {
         }
     }
 
+    private static class SearchThread extends Thread {
+        private final SearchInfo info;
+        public SearchThread(SearchInfo info) {
+            this.info = info;
+        }
+
+        @Override
+        public void run() {
+            info.setBestMove(new UCIMove("e2e4"));
+        }
+    }
+
+    public SearchInfo search(UCIGo params) {
+        SearchInfo result = new SearchInfo();
+        new SearchThread(result).run();
+        return result;
+    }
+
     public void synchronizeAll() {
         for (EngineRecord rec : enginesList) {
             rec.getEngine().synchronize();
