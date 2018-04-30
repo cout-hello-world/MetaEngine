@@ -13,6 +13,11 @@ import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 
 public class UCIEnginesManager {
+
+    // Member variables
+    private final Object enginesListMutex = new Object();
+    private final List<EngineRecord> enginesList;
+
     public static UCIEnginesManager create(Configuration conf) {
         try { // FIXME: Use real exception handling
         ExecutorService pool =
@@ -65,34 +70,36 @@ public class UCIEnginesManager {
         }
     }
 
-    private final List<EngineRecord> enginesList;
-
     private UCIEnginesManager(List<EngineRecord> toManage) {
         enginesList = toManage;
     }
 
     public List<UCIOptionBundle> getUCIOptions() {
-        List<UCIOptionBundle> ret = new ArrayList<UCIOptionBundle>();
-        for (EngineRecord rec : enginesList) {
-            UCIEngine engine = rec.getEngine();
-            ret.add(new UCIOptionBundle(engine.getOptions(),
-              engine.getName(), rec.index));
+        synchronized (enginesListMutex) {
+            List<UCIOptionBundle> ret = new ArrayList<UCIOptionBundle>();
+            for (EngineRecord rec : enginesList) {
+                UCIEngine engine = rec.getEngine();
+                ret.add(new UCIOptionBundle(engine.getOptions(),
+                  engine.getName(), rec.index));
+            }
+            return ret;
         }
-        return ret;
     }
 
     public void dispatchOption(SetoptionInfo setoptionInfo) {
-        for (EngineRecord rec : enginesList) {
-            if (rec.getIndex() == setoptionInfo.getEngineIndex()) {
-                UCIEngine engine = rec.getEngine();
-                List<UCIOption> opts = engine.getOptions();
-                for (UCIOption opt : opts) {
-                    if (opt.getName().equals(setoptionInfo.getNameString())) {
-                        UCIOption.Value val =
-                          new UCIOption.Value(setoptionInfo.getValueString(),
-                                              opt.getValueType());
-                        opt.setValue(val);
-                        engine.sendOption(opt);
+        synchronized (enginesListMutex) {
+            for (EngineRecord rec : enginesList) {
+                if (rec.getIndex() == setoptionInfo.getEngineIndex()) {
+                    UCIEngine engine = rec.getEngine();
+                    List<UCIOption> opts = engine.getOptions();
+                    for (UCIOption opt : opts) {
+                        if (opt.getName().equals(setoptionInfo.getNameString())) {
+                            UCIOption.Value val =
+                              new UCIOption.Value(setoptionInfo.getValueString(),
+                                                  opt.getValueType());
+                            opt.setValue(val);
+                            engine.sendOption(opt);
+                        }
                     }
                 }
             }
@@ -111,6 +118,7 @@ public class UCIEnginesManager {
         }
     }
 
+
     public SearchInfo search(UCIGo params) {
         SearchInfo result = new SearchInfo();
         new SearchThread(result).run();
@@ -118,14 +126,18 @@ public class UCIEnginesManager {
     }
 
     public void synchronizeAll() {
-        for (EngineRecord rec : enginesList) {
-            rec.getEngine().synchronize();
+        synchronized (enginesListMutex) {
+            for (EngineRecord rec : enginesList) {
+                rec.getEngine().synchronize();
+            }
         }
     }
 
     public void quitAll() {
-        for (EngineRecord rec : enginesList) {
-            rec.getEngine().quit();
+        synchronized (enginesListMutex) {
+            for (EngineRecord rec : enginesList) {
+                rec.getEngine().quit();
+            }
         }
     }
 }
