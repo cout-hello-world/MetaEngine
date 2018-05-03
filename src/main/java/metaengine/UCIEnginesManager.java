@@ -84,21 +84,21 @@ public class UCIEnginesManager {
     }
 
     public void dispatchOption(SetoptionInfo setoptionInfo) {
-            for (EngineRecord rec : enginesList) {
-                if (rec.getIndex() == setoptionInfo.getEngineIndex()) {
-                    UCIEngine engine = rec.getEngine();
-                    List<UCIOption> opts = engine.getOptions();
-                    for (UCIOption opt : opts) {
-                        if (opt.getName().equals(setoptionInfo.getNameString())) {
-                            UCIOption.Value val =
-                              new UCIOption.Value(setoptionInfo.getValueString(),
-                                                  opt.getValueType());
-                            opt.setValue(val);
-                            engine.sendOption(opt);
-                        }
+        for (EngineRecord rec : enginesList) {
+            if (rec.getIndex() == setoptionInfo.getEngineIndex()) {
+                UCIEngine engine = rec.getEngine();
+                List<UCIOption> opts = engine.getOptions();
+                for (UCIOption opt : opts) {
+                    if (opt.getName().equals(setoptionInfo.getNameString())) {
+                        UCIOption.Value val =
+                          new UCIOption.Value(setoptionInfo.getValueString(),
+                                              opt.getValueType());
+                        opt.setValue(val);
+                        engine.sendOption(opt);
                     }
                 }
             }
+        }
     }
 
     private class SearchThread extends Thread {
