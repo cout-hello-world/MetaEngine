@@ -10,6 +10,9 @@ import java.util.ArrayList;
 
 
 public class UCIEngine {
+
+    private final Object mutex = new Object();
+
     private final Process engineProcess;
     private final String engineName;
     private List<UCIOption> options = null;
@@ -92,29 +95,37 @@ public class UCIEngine {
     }
 
     public void sendOption(UCIOption opt) {
-        engineIO.sendLine(opt.getSetoptionString());
+        synchronized (mutex) {
+            engineIO.sendLine(opt.getSetoptionString());
+        }
     }
 
     public void sendUcinewgame() {
-        engineIO.sendLine("ucinewgame");
+        synchronized (mutex) {
+            engineIO.sendLine("ucinewgame");
+        }
     }
 
     public void synchronize() {
-        engineIO.sendLine("isready");
-        String response = "";
-        while (true) {
-            response = engineIO.readLine();
-            if (response == null) {
-                throw new RuntimeException(NULL_READLINE_MESSAGE);
-            }
-            String[] tokens = UCIUtils.tokenize(response);
-            if (tokens.length != 0 && tokens[0].equals("readyok")) {
-                break;
+        synchronized (mutex) {
+            engineIO.sendLine("isready");
+            String response = "";
+            while (true) {
+                response = engineIO.readLine();
+                if (response == null) {
+                    throw new RuntimeException(NULL_READLINE_MESSAGE);
+                }
+                String[] tokens = UCIUtils.tokenize(response);
+                if (tokens.length != 0 && tokens[0].equals("readyok")) {
+                    break;
+                }
             }
         }
     }
 
     public void quit() {
-        engineIO.sendLine("quit");
+        synchronized (mutex) {
+            engineIO.sendLine("quit");
+        }
     }
 }

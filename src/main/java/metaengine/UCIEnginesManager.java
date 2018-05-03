@@ -15,7 +15,6 @@ import java.io.IOException;
 public class UCIEnginesManager {
 
     // Member variables
-    private final Object enginesListMutex = new Object();
     private final List<EngineRecord> enginesList;
 
     public static UCIEnginesManager create(Configuration conf) {
@@ -75,19 +74,16 @@ public class UCIEnginesManager {
     }
 
     public List<UCIOptionBundle> getUCIOptions() {
-        synchronized (enginesListMutex) {
-            List<UCIOptionBundle> ret = new ArrayList<UCIOptionBundle>();
-            for (EngineRecord rec : enginesList) {
-                UCIEngine engine = rec.getEngine();
-                ret.add(new UCIOptionBundle(engine.getOptions(),
-                  engine.getName(), rec.index));
-            }
-            return ret;
+        List<UCIOptionBundle> ret = new ArrayList<UCIOptionBundle>();
+        for (EngineRecord rec : enginesList) {
+            UCIEngine engine = rec.getEngine();
+            ret.add(new UCIOptionBundle(engine.getOptions(),
+              engine.getName(), rec.index));
         }
+        return ret;
     }
 
     public void dispatchOption(SetoptionInfo setoptionInfo) {
-        synchronized (enginesListMutex) {
             for (EngineRecord rec : enginesList) {
                 if (rec.getIndex() == setoptionInfo.getEngineIndex()) {
                     UCIEngine engine = rec.getEngine();
@@ -103,10 +99,9 @@ public class UCIEnginesManager {
                     }
                 }
             }
-        }
     }
 
-    private static class SearchThread extends Thread {
+    private class SearchThread extends Thread {
         private final SearchInfo info;
         public SearchThread(SearchInfo info) {
             this.info = info;
@@ -114,8 +109,8 @@ public class UCIEnginesManager {
 
         @Override
         public void run() {
-            info.setBestMove(new UCIMove("e2e4"));
-        }
+                info.setBestMove(new UCIMove("e2e4"));
+            }
     }
 
 
@@ -126,18 +121,14 @@ public class UCIEnginesManager {
     }
 
     public void synchronizeAll() {
-        synchronized (enginesListMutex) {
             for (EngineRecord rec : enginesList) {
                 rec.getEngine().synchronize();
             }
-        }
     }
 
     public void quitAll() {
-        synchronized (enginesListMutex) {
             for (EngineRecord rec : enginesList) {
                 rec.getEngine().quit();
             }
         }
-    }
 }
