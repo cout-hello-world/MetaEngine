@@ -123,6 +123,12 @@ public class UCIEngine {
         }
     }
 
+    public void position(UCIPosition pos) {
+        synchronized (mutex) {
+            engineIO.sendLine("position " + pos.toString());
+        }
+    }
+
     public void quit() {
         synchronized (mutex) {
             engineIO.sendLine("quit");

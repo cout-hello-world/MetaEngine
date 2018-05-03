@@ -82,6 +82,8 @@ public class UCI {
                     loop = false;
                 } if (cmd.equals("go")) {
                     info = engines.search(new UCIGo(tokens));
+                } else if (cmd.equals("position")) {
+                    engines.setPosition(new UCIPosition(tokens));
                 }
                 break;
             }

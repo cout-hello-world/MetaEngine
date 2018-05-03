@@ -109,8 +109,15 @@ public class UCIEnginesManager {
 
         @Override
         public void run() {
-                info.setBestMove(new UCIMove("e2e4"));
-            }
+            // Nothing yet...
+        }
+    }
+
+    public void setPosition(UCIPosition pos) {
+        for (EngineRecord rec : enginesList) {
+            UCIEngine engine = rec.getEngine();
+            engine.position(pos);
+        }
     }
 
 
