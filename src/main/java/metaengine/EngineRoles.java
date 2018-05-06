@@ -5,7 +5,7 @@ import java.util.List;
 public class EngineRoles {
     private boolean timer = false;
     private boolean recomender = false;
-    private boolean analyzer = false;
+    private boolean judge = false;
     public EngineRoles(List<String> roles) {
         for (String role : roles) {
             switch (role) {
@@ -15,8 +15,8 @@ public class EngineRoles {
             case "recomender":
                 recomender = true;
                 break;
-            case "analyzer":
-                analyzer = true;
+            case "judge":
+                judge = true;
                 break;
             }
         }
@@ -30,7 +30,7 @@ public class EngineRoles {
         return recomender;
     }
 
-    public boolean isAnalyzer() {
-        return analyzer;
+    public boolean isJudge() {
+        return judge;
     }
 }
