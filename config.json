@@ -3,6 +3,7 @@
         {
             "argv": ["stockfish"],
             "roles": ["timer", "judge", "recomender"],
+            "copies": 2
         },
         {
             "argv": ["stockfish"],

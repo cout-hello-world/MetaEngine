@@ -10,7 +10,7 @@
     <property name="test-src" location="${src}/test/java"/>
     <property name="main-target" location="${target}/classes"/>
     <property name="test-target" location="${target}/test-classes"/>
-    <property name="jar" location="target/${ant.project.name}-${version}.jar"/>
+    <property name="jar" location="${target}/${ant.project.name}-${version}.jar"/>
     <property name="main-class" value="${package}.Main"/>
     <property name="reports" location="${target}/reports"/>
     <property name="lib" location="${target}/lib"/>
@@ -40,16 +40,25 @@
     </target>
 
     <target name="jar" depends="compile">
+        <manifestclasspath property="manifest-classpath" jarfile="${jar}">
+            <classpath>
+                <fileset dir="${lib}/main" includes="*.jar"/>
+            </classpath>
+        </manifestclasspath>
         <jar jarfile="${jar}" basedir="${main-target}">
             <manifest>
                 <attribute name="Main-Class" value="${main-class}"/>
                 <attribute name="Package-Title" value="${ant.project.name}"/>
                 <attribute name="Package-Version" value="${version}"/>
+                <attribute name="Class-Path" value="${manifest-classpath}"/>
             </manifest>
         </jar>
-        <copy todir="${target}">
-           <fileset dir="${lib}/main" includes="*.jar"/>
-        </copy>
+    </target>
+
+    <target name="dist" depends="jar">
+        <zip destfile="${target}/${ant.project.name}-${version}.zip"
+             basedir="${target}"
+             includes="${ant.project.name}-${version}.jar,lib/main/*.jar"/>
     </target>
 
     <target name="test-resolve">

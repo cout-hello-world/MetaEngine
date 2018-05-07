@@ -3,7 +3,8 @@ package metaengine;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonElement;
 
 public class Configuration {
 
@@ -36,7 +37,10 @@ public class Configuration {
         }
     }
 
-    public static Configuration newConfigurationFromString(String str) {
+    public static Configuration newConfigurationFromString(String json) {
+        JsonParser parser = new JsonParser();
+        JsonElement root = parser.parse(json);
+        // Temporary
         return new Configuration(new ArrayList<EngineConfiguration>());
     }
 
