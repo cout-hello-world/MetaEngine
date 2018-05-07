@@ -2,86 +2,51 @@ package metaengine;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Collections;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Attr;
+import com.google.gson.Gson;
 
 public class Configuration {
-    public static Configuration newConfigurationFromDocument(Document doc)
-      throws InvalidConfigurationException {
-        Element root = doc.getDocumentElement();
-        if (!root.getTagName().equals("config")) {
-            throw new InvalidConfigurationException("Root element not \"config\"");
+
+    public static class EngineConfiguration {
+        private List<String> argv = new ArrayList<String>();
+        private List<String> roles;
+        private int bias;
+        private int index;
+        public EngineConfiguration(List<String> argv, List<String> roles, int bias, int index) {
+            this.argv = argv;
+            this.roles = roles;
+            this.bias = bias;
+            this.index = index;
         }
 
-        NodeList enginesList = root.getElementsByTagName("engines");
-        if (enginesList.getLength() != 1) {
-            throw new InvalidConfigurationException(
-              "\"config\" element must contain exactly one \"engines\" element");
+        public List<String> getEngineArgv() {
+            return argv;
         }
 
-        Element engines = (Element)enginesList.item(0);
-        NodeList engineList = engines.getElementsByTagName("engine");
-
-        List<List<String>> returnList = new ArrayList<List<String>>();
-        for (int i = 0; i < engineList.getLength(); ++i) {
-            Element engineElement = (Element)engineList.item(i);
-            Attr exeAttr = engineElement.getAttributeNode("exe");
-            if (exeAttr == null) {
-                throw new InvalidConfigurationException(
-                  "\"engine\" element missing required attribute \"exe\"");
-            }
-            String exe = exeAttr.getValue();
-            int copies = 1;
-            Attr copiesAttr = engineElement.getAttributeNode("copies");
-            if (copiesAttr != null) {
-                try {
-                    copies = Integer.parseInt(copiesAttr.getValue());
-                } catch (NumberFormatException e) {
-                    throw
-                      new InvalidConfigurationException("Could not pasre \"copies\" attribute as an integer.");
-                }
-            }
-            List<String> engineArgs = new ArrayList<String>();
-            engineArgs.add(exe);
-            NodeList argsList = engineElement.getElementsByTagName("args");
-
-            int numArgs = argsList.getLength();
-            switch (numArgs) {
-            case 0:
-                break;
-            case 1:
-            {
-                Element argsElement = (Element)argsList.item(0);
-                NodeList argList = argsElement.getElementsByTagName("arg");
-                for (int j = 0; j < argList.getLength(); ++j) {
-                    engineArgs.add(argList.item(j).getTextContent().trim());
-                }
-                break;
-            }
-            default:
-                throw new InvalidConfigurationException(
-                  "\"engine\" element must contain 0 or 1 \"args\" elements");
-            }
-
-            for (int j = 0; j < copies; ++j) {
-                returnList.add(Collections.unmodifiableList(engineArgs));
-            }
+        public EngineRoles getEngineRoles() {
+            return new EngineRoles(roles);
         }
 
-        return new Configuration(Collections.unmodifiableList(returnList));
+        public int getIndex() {
+            return index;
+        }
+
+        public int getBias() {
+            return bias;
+        }
     }
 
-    private final List<List<String>> engineArguments;
-
-    private Configuration(List<List<String>> unmodifiable) {
-        engineArguments = unmodifiable;
+    public static Configuration newConfigurationFromString(String str) {
+        return new Configuration(new ArrayList<EngineConfiguration>());
     }
 
-    public List<List<String>> getUnmodifiableEngineArguments() {
-        return engineArguments;
+    private final List<EngineConfiguration> engineConfigurations;
+
+    private Configuration(List<EngineConfiguration> engineConfigs) {
+        engineConfigurations = engineConfigs;
+    }
+
+    public List<EngineConfiguration> getEngineConfigurations() {
+        return engineConfigurations;
     }
 }

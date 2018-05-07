@@ -2,9 +2,11 @@
 <ivy-module version="2.0">
     <info organisation="" module="MetaEngine"/>
     <configurations>
-        <conf name="test"/>
+        <conf name="main"/>
+        <conf name="test" extends="main"/>
     </configurations>
     <dependencies>
+        <dependency org="com.google.code.gson" name="gson" rev="2.8.4" conf="main->default"/>
         <dependency org="junit" name="junit" rev="4.12" conf="test->default"/>
     </dependencies>
 </ivy-module>

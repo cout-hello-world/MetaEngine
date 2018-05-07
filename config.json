@@ -1,0 +1,18 @@
+{
+    "engines": [
+        {
+            "argv": ["stockfish"],
+            "roles": ["timer", "judge", "recomender"],
+        },
+        {
+            "argv": ["stockfish"],
+            "roles": ["judge"]
+        },
+        {
+            "argv": ["lczero", "-w weights-251.txt"],
+            "dir": "/home/henry/Documents/chess/leela-chess/build8gpu/bin",
+            "roles": "recomender",
+            "bias": 20
+        }
+    ]
+}

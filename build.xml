@@ -23,13 +23,20 @@
         <javadoc sourcepath="${main-src}" destdir="${doc-target}"/>
     </target>
 
-    <target name="compile">
+    <target name="main-resolve">
+        <ivy:retrieve pattern="${lib}/[conf]/[artifact]-[revision].[ext]" conf="main"/>
+        <ivy:cachepath pathid="main-dep-path" conf="main"/>
+    </target>
+
+    <target name="compile" depends="main-resolve">
         <mkdir dir="${main-target}"/>
         <mkdir dir="${depcache}"/>
         <depend srcdir="${main-src}" destdir="${main-target}" closure="true"
           cache="${depcache}"/>
         <javac includeantruntime="false"
-          srcdir="${main-src}" destdir="${main-target}" debug="${debug}"/>
+          srcdir="${main-src}" destdir="${main-target}" debug="${debug}">
+            <classpath refid="main-dep-path"/>
+        </javac>
     </target>
 
     <target name="jar" depends="compile">
@@ -40,14 +47,17 @@
                 <attribute name="Package-Version" value="${version}"/>
             </manifest>
         </jar>
+        <copy todir="${target}">
+           <fileset dir="${lib}/main" includes="*.jar"/>
+        </copy>
     </target>
 
-    <target name="resolve">
-        <ivy:retrieve pattern="${lib}/[conf]/[artifact]-[revision].[ext]"/>
+    <target name="test-resolve">
+        <ivy:retrieve pattern="${lib}/[conf]/[artifact]-[revision].[ext]" conf="test"/>
         <ivy:cachepath pathid="test-dep-path" conf="test"/>
     </target>
 
-    <target name="test-compile" depends="compile,resolve">
+    <target name="test-compile" depends="compile,test-resolve">
         <mkdir dir="${test-target}"/>
         <depend srcdir="${test-src}" destdir="${test-target}"
           classpath="${main-target}" closure="true" cache="${depcache}"/>

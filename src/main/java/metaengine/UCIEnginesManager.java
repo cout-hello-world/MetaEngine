@@ -21,19 +21,16 @@ public class UCIEnginesManager {
         try { // FIXME: Use real exception handling
         ExecutorService pool =
           Executors.newCachedThreadPool();
-        List<List<String>> listOfArgLists =
-          conf.getUnmodifiableEngineArguments();
+          List<Configuration.EngineConfiguration> engineConfigs =
+            conf.getEngineConfigurations();
 
         List<Future<EngineRecord>> futureEngines =
           new ArrayList<Future<EngineRecord>>();
-        int idx = 0;
-        for (List<String> argsList : listOfArgLists) {
-            int tempIdx = idx;
+        for (Configuration.EngineConfiguration engineConf : engineConfigs) {
             Callable<EngineRecord> constructEngine = () -> {
-                return new EngineRecord(new UCIEngine(argsList), tempIdx);
+                return new EngineRecord(new UCIEngine(engineConf.getEngineArgv()), engineConf);
             };
             futureEngines.add(pool.submit(constructEngine));
-            ++idx;
         }
 
         List<EngineRecord> engines = new ArrayList<EngineRecord>();
@@ -54,10 +51,10 @@ public class UCIEnginesManager {
 
     private static class EngineRecord {
         private final UCIEngine engine;
-        private final int index;
-        public EngineRecord(UCIEngine engine, int idx) {
+        private final Configuration.EngineConfiguration conf;
+        public EngineRecord(UCIEngine engine, Configuration.EngineConfiguration config) {
             this.engine = engine;
-            index = idx;
+            this.conf = config;
         }
 
         public UCIEngine getEngine() {
@@ -65,7 +62,7 @@ public class UCIEnginesManager {
         }
 
         public int getIndex() {
-            return index;
+            return conf.getIndex();
         }
     }
 
@@ -78,7 +75,7 @@ public class UCIEnginesManager {
         for (EngineRecord rec : enginesList) {
             UCIEngine engine = rec.getEngine();
             ret.add(new UCIOptionBundle(engine.getOptions(),
-              engine.getName(), rec.index));
+              engine.getName(), rec.getIndex()));
         }
         return ret;
     }
@@ -109,7 +106,9 @@ public class UCIEnginesManager {
 
         @Override
         public void run() {
-            // Nothing yet...
+            for (EngineRecord rec : enginesList) {
+                // TODO: We're not in Kansas anymore
+            }
         }
     }
 

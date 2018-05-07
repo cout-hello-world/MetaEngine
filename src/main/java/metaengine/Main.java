@@ -1,24 +1,23 @@
 package metaengine;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.PrintStream;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 
 public class Main {
 
-
+    private static String readUTF8FileAsString(String path) throws IOException {
+        byte[] bytes = Files.readAllBytes(Paths.get(path));
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
 
     public static void main(String[] args)
       // TODO: Real exception handling
-      throws ParserConfigurationException, IOException,
-             InvalidConfigurationException {
+      throws IOException, InvalidConfigurationException {
         if (args.length != 1) {
             printHelp(System.err);
             System.exit(1);
@@ -31,30 +30,16 @@ public class Main {
             return;
         }
 
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        File config = new File(args[0]);
-        Document doc;
-        try {
-            doc = db.parse(new File(args[0]));
-        } catch (IOException e){
-            System.err.println("Error reading from config file: " + config);
-            System.exit(1);
-            return;
-        } catch (SAXException e) {
-            System.err.println("Error parsing config file: " + e.getMessage());
-            System.exit(1);
-            return;
-        }
+        String configFileContents = readUTF8FileAsString(args[0]);
 
         Configuration configuration =
-          Configuration.newConfigurationFromDocument(doc);
+          Configuration.newConfigurationFromString(configFileContents);
         UCIEnginesManager engines = UCIEnginesManager.create(configuration);
 
         System.exit(new UCI(engines).loop());
     }
 
     private static void printHelp(PrintStream out) {
-        out.println("Usage: java -jar <MetaEngine_jar> <xml_config_file>");
+        out.println("Usage: java -jar <MetaEngine_jar> <json_config_file>");
     }
 }
