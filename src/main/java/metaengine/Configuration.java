@@ -11,13 +11,14 @@ import com.google.gson.JsonArray;
 public class Configuration {
 
     public static class EngineConfiguration {
-        private List<String> argv = new ArrayList<String>();
-        private List<String> roles;
-        private int bias;
-        private int index;
-        public EngineConfiguration(List<String> argv, List<String> roles, int bias, int index) {
+        private final List<String> argv;
+        private final EngineRoles roles;
+        private final int bias;
+        private final int index;
+        public EngineConfiguration(List<String> argv, List<String> roles,
+                                   int bias, int index) {
             this.argv = argv;
-            this.roles = roles;
+            this.roles = new EngineRles(roles);
             this.bias = bias;
             this.index = index;
         }
@@ -27,7 +28,7 @@ public class Configuration {
         }
 
         public EngineRoles getEngineRoles() {
-            return new EngineRoles(roles);
+            return roles;
         }
 
         public int getIndex() {
@@ -94,45 +95,88 @@ public class Configuration {
     public static Configuration newConfigurationFromString(String input)
       throws InvalidConfigurationException {
         String json = removeComments(input);
+
+        int index = 0;
+        List<EngineConfiguration> engineConfigurationList
+          = new ArrayList<EngineConfiguration>();
         JsonParser parser = new JsonParser();
         JsonElement rootElement = parser.parse(json);
         if (!rootElement.isJsonObject()) {
-            throw new InvalidConfigurationException("Root JSON element must be an object");
+            throw new InvalidConfigurationException(
+              "Root JSON element must be an object");
         }
         JsonObject rootObject = rootElement.getAsJsonObject();
         if (!rootObject.has("engines")) {
-            throw new InvalidConfigurationException("Root object must have the key \"engines\"");
+            throw new InvalidConfigurationException(
+              "Root object must have the key \"engines\"");
         }
         JsonElement enginesElement = rootObject.get("engines");
         if (!enginesElement.isJsonArray()) {
-            throw new InvalidConfigurationException("Value of \"engines\" key must be an array");
+            throw new InvalidConfigurationException(
+              "Value of \"engines\" key must be an array");
         }
         JsonArray enginesArray = enginesElement.getAsJsonArray();
         for (JsonElement engineElem : enginesArray) {
             if (!engineElem.isJsonObject()) {
-                throw new InvalidConfigurationException("Elements of \"engines\" array must be objects");
+                throw new InvalidConfigurationException(
+                  "Elements of \"engines\" array must be objects");
             }
             JsonObject engineObject = engineElem.getAsJsonObject();
             if (!engineObject.has("argv")) {
-                throw new InvalidConfigurationException("engine object missing required element \"argv\"");
+                throw new InvalidConfigurationException(
+                  "engine object missing required element \"argv\"");
             }
             JsonElement argvElement = engineObject.get("argv");
             if (!argvElement.isJsonArray()) {
-                throw new InvalidConfigurationException("\"argv\" key must must have array value");
+                throw new InvalidConfigurationException(
+                  "\"argv\" key must must have array value");
             }
             JsonArray argvArray = argvElement.getAsJsonArray();
             List<String> argvStrings = new ArrayList<String>();
             for (JsonElement argvArg : argvArray) {
-                if (!argvArg.isJsonPrimative()) {
-                    throw new InvalidConfigurationException("Elements of \"argv\" array must be primitives");
+                if (!argvArg.isJsonPrimitive()) {
+                    throw new InvalidConfigurationException(
+                      "Elements of \"argv\" array must be primitives");
                 }
-                argvString.add(argvAry.toString());
+                argvStrings.add(argvArg.toString());
             }
 
-            if (!engineObject.has("roles"))
+            if (!engineObject.has("roles")) {
+                throw new InvalidConfigurationException(
+                  "Engine object must have \"roles\" key");
+            }
+            JsonElement rolesElement = engineObject.get("roles");
+            if (!rolesElement.isJsonArray()) {
+                throw new InvalidConfigurationException(
+                  "\"roles\" key must have value of type array");
+            }
+            JsonArray rolesArray = rolesElement.getAsJsonArray();
+            List<String> roleStrings = new ArrayList<String>();
+            for (JsonElement role : rolesArray) {
+                if (!role.isJsonPrimitive()) {
+                    throw new InvalidConfigurationException(
+                      "element of \"roles\" array must be primitive");
+                }
+                roleStrings.add(role.toString());
+            }
+
+            int copies = 1;
+            if (engineObject.has("copies")) {
+                copies = engineObject.get("copies").getAsInt();
+            }
+            int bias = 0;
+            if (engineObject.has("bias")) {
+                bias = engineObject.get("bias").getAsInt();
+            }
+
+            for (int i = 0; i != copies; ++i) {
+                engineConfigurationList.add(new EngineConfiguration(
+                  argvStrings, roleStrings, bias, index));
+                ++index;
+            }
         }
-        // Temporary
-        return new Configuration(new ArrayList<EngineConfiguration>());
+
+        return new Configuration(engineConfigurationList);
     }
 
     private final List<EngineConfiguration> engineConfigurations;
