@@ -18,7 +18,7 @@ public class Configuration {
         public EngineConfiguration(List<String> argv, List<String> roles,
                                    int bias, int index) {
             this.argv = argv;
-            this.roles = new EngineRles(roles);
+            this.roles = new EngineRoles(roles);
             this.bias = bias;
             this.index = index;
         }
@@ -138,7 +138,7 @@ public class Configuration {
                     throw new InvalidConfigurationException(
                       "Elements of \"argv\" array must be primitives");
                 }
-                argvStrings.add(argvArg.toString());
+                argvStrings.add(argvArg.getAsString());
             }
 
             if (!engineObject.has("roles")) {
@@ -157,7 +157,7 @@ public class Configuration {
                     throw new InvalidConfigurationException(
                       "element of \"roles\" array must be primitive");
                 }
-                roleStrings.add(role.toString());
+                roleStrings.add(role.getAsString());
             }
 
             int copies = 1;

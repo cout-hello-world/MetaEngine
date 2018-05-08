@@ -30,6 +30,12 @@ public class UCI {
         }
     }
 
+    private static void printIDInfo(PrintStream out) {
+        out.println("id name " + IDInfo.getName());
+        out.println("id author " + IDInfo.getAuthor());
+        out.println();
+    }
+
     /**
      * This function executes a main UCI loop. Its return value is
      * suitable as a return code for a calling process.
@@ -59,6 +65,7 @@ public class UCI {
             switch (state) {
             case BEFORE_UCI:
                 if (cmd.equals("uci")) {
+                    printIDInfo(out);
                     printEngineOptions(out);
                     out.println("uciok");
                     state = State.AFTER_UCI;
