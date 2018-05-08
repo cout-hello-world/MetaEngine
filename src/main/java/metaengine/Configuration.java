@@ -39,8 +39,61 @@ public class Configuration {
         }
     }
 
-    public static Configuration newConfigurationFromString(String json)
+    private enum RemoveCommentsState {
+        NORMAL, SAW_SLASH, IN_C_COMMENT, SAW_STAR, IN_CPP_COMMENT
+    }
+
+    public static String removeComments(String str) {
+        StringBuilder builder = new StringBuilder(str.length());
+        RemoveCommentsState state = RemoveCommentsState.NORMAL;
+        for (int i = 0; i != str.length(); ++i) {
+            char ch = str.charAt(i);
+            switch (state) {
+            case NORMAL:
+                if (ch == '/') {
+                    state = RemoveCommentsState.SAW_SLASH;
+                } else {
+                    builder.append(ch);
+                }
+                break;
+            case SAW_SLASH:
+                if (ch == '/') {
+                    state = RemoveCommentsState.IN_CPP_COMMENT;
+                } else if (ch == '*') {
+                    state = RemoveCommentsState.IN_C_COMMENT;
+                } else {
+                    state = RemoveCommentsState.NORMAL;
+                    builder.append('/');
+                    builder.append(ch);
+                }
+                break;
+            case IN_C_COMMENT:
+                if (ch == '*') {
+                    state = RemoveCommentsState.SAW_STAR;
+                }
+                break;
+            case SAW_STAR:
+                if (ch == '/') {
+                    state = RemoveCommentsState.NORMAL;
+                }
+                break;
+            case IN_CPP_COMMENT:
+                if (ch == '\n') {
+                    state = RemoveCommentsState.NORMAL;
+                }
+                break;
+            }
+        }
+        if (state == RemoveCommentsState.SAW_SLASH) {
+            builder.append('/');
+        }
+
+        return builder.toString();
+    }
+
+    public static Configuration newConfigurationFromString(String input)
       throws InvalidConfigurationException {
+        String json = removeComments(input);
         JsonParser parser = new JsonParser();
         JsonElement rootElement = parser.parse(json);
         if (!rootElement.isJsonObject()) {

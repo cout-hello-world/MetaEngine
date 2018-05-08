@@ -1,3 +1,8 @@
+// This is an example configuration file for MetaEngine. Despite the extension,
+// it is really just JSON with C (/**/) and C++ style (//) comments. I used
+// the .js extension to make syntax highlighters happy. MetaEngine does not care
+// about the file name extension (or lack thereof) so long as the file is valid
+// JSON once the comments are removed.
 {
     "engines": [
         {
