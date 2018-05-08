@@ -9,13 +9,13 @@ public class EngineRoles {
     public EngineRoles(List<String> roles) {
         for (String role : roles) {
             switch (role) {
-            case "timer":
+            case "TIMER":
                 timer = true;
                 break;
-            case "recomender":
+            case "RECOMENDER":
                 recomender = true;
                 break;
-            case "judge":
+            case "JUDGE":
                 judge = true;
                 break;
             }

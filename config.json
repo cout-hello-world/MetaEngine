@@ -2,12 +2,12 @@
     "engines": [
         {
             "argv": ["stockfish"],
-            "roles": ["timer", "judge", "recomender"],
+            "roles": ["TIMER", "JUDGE", "RECOMENDER"],
             "copies": 2
         },
         {
             "argv": ["stockfish"],
-            "roles": ["judge"]
+            "roles": ["JUDGE"]
         },
         {
             "argv": ["lczero", "-w weights-251.txt"],
