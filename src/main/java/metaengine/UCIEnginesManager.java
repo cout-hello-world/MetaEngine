@@ -16,34 +16,41 @@ public class UCIEnginesManager {
 
     // Member variables
     private final List<EngineRecord> enginesList;
+    private final List<EngineRecord> recomenderRecords = new ArrayList<>();
+    private final List<EngineRecord> judgeRecords = new ArrayList<>();
+    private EngineRecord timerRecord = null;
 
-    public static UCIEnginesManager create(Configuration conf) {
-        try { // FIXME: Use real exception handling
-        ExecutorService pool =
-          Executors.newCachedThreadPool();
-          List<Configuration.EngineConfiguration> engineConfigs =
-            conf.getEngineConfigurations();
+    public static UCIEnginesManager create(Configuration conf)
+      throws InvalidConfigurationException {
+        try {
+            ExecutorService pool =
+              Executors.newCachedThreadPool();
+              List<Configuration.EngineConfiguration> engineConfigs =
+                conf.getEngineConfigurations();
 
-        List<Future<EngineRecord>> futureEngines =
-          new ArrayList<Future<EngineRecord>>();
-        for (Configuration.EngineConfiguration engineConf : engineConfigs) {
-            Callable<EngineRecord> constructEngine = () -> {
-                return new EngineRecord(new UCIEngine(engineConf.getEngineArgv()), engineConf);
-            };
-            futureEngines.add(pool.submit(constructEngine));
-        }
+            List<Future<EngineRecord>> futureEngines =
+              new ArrayList<Future<EngineRecord>>();
+            for (Configuration.EngineConfiguration engineConf : engineConfigs) {
+                Callable<EngineRecord> constructEngine = () -> {
+                    return new EngineRecord(new UCIEngine(
+                      engineConf.getEngineArgv()), engineConf);
+                };
+                futureEngines.add(pool.submit(constructEngine));
+            }
 
-        List<EngineRecord> engines = new ArrayList<EngineRecord>();
-        for (Future<EngineRecord> future : futureEngines) {
-            engines.add(future.get());
-        }
+            List<EngineRecord> engines = new ArrayList<EngineRecord>();
+            for (Future<EngineRecord> future : futureEngines) {
+                engines.add(future.get());
+            }
 
-        pool.shutdown();
-        if (!pool.awaitTermination(1, TimeUnit.SECONDS)) {
-            pool.shutdownNow();
-        }
+            pool.shutdown();
+            if (!pool.awaitTermination(1, TimeUnit.SECONDS)) {
+                pool.shutdownNow();
+            }
 
-        return new UCIEnginesManager(engines);
+            return new UCIEnginesManager(engines);
+        } catch (InvalidConfigurationException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("This is for testing purposes only", e);
         }
@@ -64,10 +71,39 @@ public class UCIEnginesManager {
         public int getIndex() {
             return conf.getIndex();
         }
+
+        public Configuration.EngineConfiguration getConfig() {
+            return conf;
+        }
     }
 
-    private UCIEnginesManager(List<EngineRecord> toManage) {
+    private UCIEnginesManager(List<EngineRecord> toManage)
+      throws InvalidConfigurationException {
         enginesList = toManage;
+        for (EngineRecord rec : enginesList) {
+             EngineRoles roles = rec.getConfig().getEngineRoles();
+             if (roles.isRecomender()) {
+                 recomenderRecords.add(rec);
+             }
+             if (roles.isJudge()) {
+                 judgeRecords.add(rec);
+             }
+             if (roles.isTimer()) {
+                 timerRecord = rec;
+             }
+        }
+
+        if (recomenderRecords.size() != judgeRecords.size()) {
+            throw new InvalidConfigurationException(
+              "There must be the same number of recomenders as judges");
+        }
+        if (recomenderRecords.size() == 0) {
+            throw new InvalidConfigurationException(
+              "There must be at least one recomender");
+        }
+        if (timerRecord == null) {
+            throw new InvalidConfigurationException("There must be a timer");
+        }
     }
 
     public List<UCIOptionBundle> getUCIOptions() {
@@ -107,6 +143,7 @@ public class UCIEnginesManager {
         @Override
         public void run() {
             for (EngineRecord rec : enginesList) {
+                Configuration.EngineConfiguration conf = rec.getConfig();
                 // TODO: We're not in Kansas anymore
             }
         }

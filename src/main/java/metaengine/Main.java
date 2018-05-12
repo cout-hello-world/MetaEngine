@@ -32,9 +32,16 @@ public class Main {
 
         String configFileContents = readUTF8FileAsString(args[0]);
 
-        Configuration configuration =
-          Configuration.newConfigurationFromString(configFileContents);
-        UCIEnginesManager engines = UCIEnginesManager.create(configuration);
+        UCIEnginesManager engines;
+        try {
+            Configuration configuration =
+              Configuration.newConfigurationFromString(configFileContents);
+            engines = UCIEnginesManager.create(configuration);
+        } catch (InvalidConfigurationException e) {
+            System.err.println("Error in configuration: " + e.getMessage());
+            System.exit(1);
+            return;
+        }
 
         System.exit(new UCI(engines).loop());
     }
