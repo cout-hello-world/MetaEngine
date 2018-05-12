@@ -41,7 +41,8 @@ public class Configuration {
     }
 
     private enum RemoveCommentsState {
-        NORMAL, SAW_SLASH, IN_C_COMMENT, SAW_STAR, IN_CPP_COMMENT
+        NORMAL, IN_STRING, SAW_STRING_ESCAPE, SAW_SLASH, IN_C_COMMENT,
+        SAW_STAR, IN_CPP_COMMENT
     }
 
     public static String removeComments(String str) {
@@ -56,6 +57,21 @@ public class Configuration {
                 } else {
                     builder.append(ch);
                 }
+                if (ch == '"') {
+                    state = RemoveCommentsState.IN_STRING;
+                }
+                break;
+            case IN_STRING:
+                if (ch == '"') {
+                    state = RemoveCommentsState.NORMAL;
+                } else if (ch == '\\') {
+                    state = RemoveCommentsState.SAW_STRING_ESCAPE;
+                }
+                builder.append(ch);
+                break;
+            case SAW_STRING_ESCAPE:
+                state = RemoveCommentsState.IN_STRING;
+                builder.append(ch);
                 break;
             case SAW_SLASH:
                 if (ch == '/') {
