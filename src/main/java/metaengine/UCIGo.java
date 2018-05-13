@@ -130,6 +130,97 @@ public class UCIGo {
         return ponder;
     }
 
+    /**
+     * This function converts a UCIGo from an input UCIGo to one suitable for
+     * a timer.
+     *
+     * In other words, it halves the values of the increment and time remaining.
+     */
+    public UCIGo getConvertedForTimer() {
+        SearchType searchType = getSearchType();
+        UCIGo res = new UCIGo(this);
+
+        switch (searchType) {
+        case GAME:
+            if (res.winc != -1) {
+                res.winc /= 2;
+            }
+            if (res.binc != -1) {
+                res.binc /= 2;
+            }
+            if (res.wtime != -1) {
+                res.wtime /= 2;
+            }
+            break;
+        case MOVETIME:
+            if (res.movetime != -1) {
+                res.movetime /= 2;
+            }
+            break;
+        default:
+            // TODO: Other types of searches
+            throw new RuntimeException(
+              "Only game and movetime type searches are presently implemented");
+        }
+        return res;
+    }
+
+    private UCIGo(UCIGo orig) {
+        for (UCIMove move : orig.moves) {
+            moves.add(move);
+        }
+        ponder = orig.ponder;
+        infinite = orig.infinite;
+        wtime = orig.wtime;
+        btime = orig.btime;
+        winc = orig.winc;
+        movestogo = orig.movestogo;
+        depth = orig.depth;
+        mate = orig.mate;
+        movetime = orig.movetime;
+    }
+
+    @Override
+    public String toString() {
+        // If performace becomes an issue consider caching this string.
+        StringBuilder builder = new StringBuilder("go");
+        if (moves.size() != 0) {
+            builder.append(" searchmoves");
+            for (UCIMove move : moves) {
+                builder.append(" " + move.toString());
+            }
+        }
+        if (ponder) {
+            builder.append(" ponder");
+        }
+        if (wtime != -1) {
+            builder.append(" wtime " + wtime);
+        }
+        if (btime != -1) {
+            builder.append(" btime " + btime);
+        }
+        if (winc != -1) {
+            builder.append(" winc " + winc);
+        }
+        if (binc != -1) {
+            builder.append(" binc " + binc);
+        }
+        if (movestogo != -1) {
+            builder.append(" movestogo " + movestogo);
+        }
+        if (depth != -1) {
+            builder.append(" depth " + depth);
+        }
+        if (mate != -1) {
+            builder.append(" mate " + mate);
+        }
+        if (infinite) {
+            builder.append(" infinite");
+        }
+        return builder.toString();
+    }
+
+    // NOTE: Any fields added must be handled in the copy ctor
     private List<UCIMove> moves = new ArrayList<UCIMove>();
     private boolean ponder = false;
     private boolean infinite = false;

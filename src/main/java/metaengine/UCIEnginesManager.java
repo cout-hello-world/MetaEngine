@@ -144,6 +144,8 @@ public class UCIEnginesManager {
         @Override
         public void run() {
             UCIEngine timerEngine = timerRecord.getEngine();
+            //timerEngine.go();
+            long timerStart = System.nanoTime();
             for (EngineRecord rec : recomenderRecords) {
                 Configuration.EngineConfiguration conf = rec.getConfig();
 

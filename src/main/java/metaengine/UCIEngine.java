@@ -106,6 +106,10 @@ public class UCIEngine {
         }
     }
 
+    //public Move(UCIGo parameters) {
+
+    //}
+
     public void synchronize() {
         synchronized (mutex) {
             engineIO.sendLine("isready");
