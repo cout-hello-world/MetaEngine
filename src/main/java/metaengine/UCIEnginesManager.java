@@ -82,27 +82,26 @@ public class UCIEnginesManager {
         enginesList = toManage;
         for (EngineRecord rec : enginesList) {
              EngineRoles roles = rec.getConfig().getEngineRoles();
-             if (roles.isRecomender()) {
-                 recomenderRecords.add(rec);
-             }
-             if (roles.isJudge()) {
-                 judgeRecords.add(rec);
-             }
+
              if (roles.isTimer()) {
                  timerRecord = rec;
-             }
+             } else {
+                 if (roles.isRecomender()) {
+                     recomenderRecords.add(rec);
+                 }
+                 if (roles.isJudge()) {
+                     judgeRecords.add(rec);
+                 }
+            }
         }
 
-        if (recomenderRecords.size() != judgeRecords.size()) {
-            throw new InvalidConfigurationException(
-              "There must be the same number of recomenders as judges");
-        }
-        if (recomenderRecords.size() == 0) {
-            throw new InvalidConfigurationException(
-              "There must be at least one recomender");
-        }
+        // There is one timer which is also implicitly a recomender
         if (timerRecord == null) {
             throw new InvalidConfigurationException("There must be a timer");
+        }
+        if (recomenderRecords.size() + 1 != judgeRecords.size()) {
+            throw new InvalidConfigurationException(
+              "There must be the same number of recomenders as judges");
         }
     }
 
@@ -136,14 +135,18 @@ public class UCIEnginesManager {
 
     private class SearchThread extends Thread {
         private final SearchInfo info;
-        public SearchThread(SearchInfo info) {
+        private final UCIGo goInfo;
+        public SearchThread(SearchInfo info, UCIGo goInfo) {
             this.info = info;
+            this.goInfo = goInfo;
         }
 
         @Override
         public void run() {
-            for (EngineRecord rec : enginesList) {
+            UCIEngine timerEngine = timerRecord.getEngine();
+            for (EngineRecord rec : recomenderRecords) {
                 Configuration.EngineConfiguration conf = rec.getConfig();
+
                 // TODO: We're not in Kansas anymore
             }
         }
@@ -159,7 +162,7 @@ public class UCIEnginesManager {
 
     public SearchInfo search(UCIGo params) {
         SearchInfo result = new SearchInfo();
-        new SearchThread(result).run();
+        new SearchThread(result, params).run();
         return result;
     }
 

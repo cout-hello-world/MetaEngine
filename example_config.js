@@ -12,7 +12,7 @@
             "argv": ["stockfish"],
             // "roles" is required. It must include at least one of "JUDGE" and
             // "RECOMENDER".
-            "roles": ["TIMER", "JUDGE", "RECOMENDER"],
+            "roles": ["TIMER", "RECOMENDER"],
             // Options set here will be overridden by options set through UCI
             // TODO: "options" is not yet implemented
             /*
@@ -24,12 +24,11 @@
                 "Clear Hash": "PRESS"
             },*/
             "copies": 1
-        }
-        /*
+        },
         {
             "argv": ["stockfish"],
             "roles": ["JUDGE"]
-        },
+        }/*,
         {
             "argv": ["lczero", "-w weights-251.txt"],
             "dir": "/home/henry/Documents/chess/leela-chess/build8gpu/bin",
