@@ -106,9 +106,24 @@ public class UCIEngine {
         }
     }
 
-    //public Move(UCIGo parameters) {
-
-    //}
+    public UCIMove go(UCIGo searchParams) {
+        // FIXME: This implementation makes it difficult to support "stop"
+        synchronized (mutex) {
+            engineIO.sendLine(searchParams.toString());
+            while (true) {
+                String response = engineIO.readLine();
+                if (response == null) {
+                    throw new RuntimeException(NULL_READLINE_MESSAGE);
+                }
+                String[] tokens = UCIUtils.tokenize(response);
+                if (tokens.length != 0) {
+                    if (tokens[0].equals("bestmove")) {
+                        return new UCIMove(tokens[1]);
+                    }
+                }
+            }
+        }
+    }
 
     public void synchronize() {
         synchronized (mutex) {
