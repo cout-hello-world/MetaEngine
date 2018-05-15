@@ -10,13 +10,41 @@ import java.util.ArrayList;
 
 
 public class UCIEngine {
+    private static final boolean DEBUG_IO = true;
 
     private final Process engineProcess;
     private final String engineName;
     private List<UCIOption> options = null;
     private final ProcessIO engineIO;
-    private static final boolean DEBUG_IO = true;
-//    private static final AtomicInteger score = new AtomicInteger();
+    private final Score score = new Score();
+
+    private final static class Score {
+        int score = 0;
+        boolean hasScore = false;
+        Object lock = new Object();
+
+        void setScore(int score) {
+            synchronized (lock) {
+                this.score = score;
+                hasScore = true;
+            }
+        }
+
+        /**
+         * This function returns an Integer representing the score held by this
+         * object or null if there is no score.
+         */
+        Integer getScore() {
+            synchronized (lock) {
+                if (hasScore) {
+                    return score;
+                } else {
+                    return null;
+                }
+            }
+        }
+    }
+
 
     private static final String NULL_READLINE_MESSAGE =
         "Unexpected EOF when reading from engine";
@@ -118,6 +146,8 @@ public class UCIEngine {
             if (tokens.length != 0) {
                 if (tokens[0].equals("bestmove")) {
                     return new UCIMove(tokens[1]);
+                } else if (tokens.equals("info")) {
+
                 }
             }
         }
