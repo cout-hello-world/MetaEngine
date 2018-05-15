@@ -14,9 +14,9 @@ public class UCIEngine {
     private final Process engineProcess;
     private final String engineName;
     private List<UCIOption> options = null;
-    private final Object IOMutex = new Object();
     private final ProcessIO engineIO;
     private static final boolean DEBUG_IO = true;
+//    private static final AtomicInteger score = new AtomicInteger();
 
     private static final String NULL_READLINE_MESSAGE =
         "Unexpected EOF when reading from engine";
@@ -94,15 +94,11 @@ public class UCIEngine {
     }
 
     public void sendOption(UCIOption opt) {
-        synchronized (IOMutex) {
-            engineIO.sendLine(opt.getSetoptionString());
-        }
+        engineIO.sendLine(opt.getSetoptionString());
     }
 
     public void sendUcinewgame() {
-        synchronized (IOMutex) {
-            engineIO.sendLine("ucinewgame");
-        }
+        engineIO.sendLine("ucinewgame");
     }
 
     // This function stops the search as soon as possible and returns the most
@@ -112,52 +108,41 @@ public class UCIEngine {
     }
 
     public UCIMove go(UCIGo searchParams) {
-        synchronized (IOMutex) {
-            engineIO.sendLine(searchParams.toString());
-        }
-            while (true) {
-                String response;
-                synchronized (IOMutex) {
-                    response = engineIO.readLine();
-                }
-                if (response == null) {
-                    throw new RuntimeException(NULL_READLINE_MESSAGE);
-                }
-                String[] tokens = UCIUtils.tokenize(response);
-                if (tokens.length != 0) {
-                    if (tokens[0].equals("bestmove")) {
-                        return new UCIMove(tokens[1]);
-                    }
+        engineIO.sendLine(searchParams.toString());
+        while (true) {
+            String response = engineIO.readLine();
+            if (response == null) {
+                throw new RuntimeException(NULL_READLINE_MESSAGE);
+            }
+            String[] tokens = UCIUtils.tokenize(response);
+            if (tokens.length != 0) {
+                if (tokens[0].equals("bestmove")) {
+                    return new UCIMove(tokens[1]);
                 }
             }
+        }
     }
 
     public void synchronize() {
-        synchronized (IOMutex) {
-            engineIO.sendLine("isready");
-            String response = "";
-            while (true) {
-                response = engineIO.readLine();
-                if (response == null) {
-                    throw new RuntimeException(NULL_READLINE_MESSAGE);
-                }
-                String[] tokens = UCIUtils.tokenize(response);
-                if (tokens.length != 0 && tokens[0].equals("readyok")) {
-                    break;
-                }
+        engineIO.sendLine("isready");
+        String response = "";
+        while (true) {
+            response = engineIO.readLine();
+            if (response == null) {
+                throw new RuntimeException(NULL_READLINE_MESSAGE);
+            }
+            String[] tokens = UCIUtils.tokenize(response);
+            if (tokens.length != 0 && tokens[0].equals("readyok")) {
+                break;
             }
         }
     }
 
     public void position(UCIPosition pos) {
-        synchronized (IOMutex) {
-            engineIO.sendLine("position " + pos.toString());
-        }
+        engineIO.sendLine("position " + pos.toString());
     }
 
     public void quit() {
-        synchronized (IOMutex) {
-            engineIO.sendLine("quit");
-        }
+        engineIO.sendLine("quit");
     }
 }

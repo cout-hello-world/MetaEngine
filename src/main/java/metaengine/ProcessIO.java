@@ -8,7 +8,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 public class ProcessIO {
+    private final Object readMutex = new Object();
     private final BufferedReader fromProc;
+    private final Object writeMutex = new Object();
     private final PrintWriter toProc;
     private final boolean debug;
     private final String name;
@@ -34,7 +36,9 @@ public class ProcessIO {
     public String readLine() {
         String result;
         try {
-            result = fromProc.readLine();
+            synchronized (readMutex) {
+                result = fromProc.readLine();
+            }
         } catch (IOException e) {
             throw new RuntimeException("Unexpted error reading from process");
         }
@@ -49,7 +53,9 @@ public class ProcessIO {
     }
 
     public void sendLine(String line) {
-        toProc.println(line);
+        synchronized (writeMutex) {
+            toProc.println(line);
+        }
         if (debug) {
             String toPrint = "Sent \"" + line + "\"";
             if (name != null) {
