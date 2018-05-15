@@ -16,35 +16,6 @@ public class UCIEngine {
     private final String engineName;
     private List<UCIOption> options = null;
     private final ProcessIO engineIO;
-    private final Score score = new Score();
-
-    private final static class Score {
-        int score = 0;
-        boolean hasScore = false;
-        Object lock = new Object();
-
-        void setScore(int score) {
-            synchronized (lock) {
-                this.score = score;
-                hasScore = true;
-            }
-        }
-
-        /**
-         * This function returns an Integer representing the score held by this
-         * object or null if there is no score.
-         */
-        Integer getScore() {
-            synchronized (lock) {
-                if (hasScore) {
-                    return score;
-                } else {
-                    return null;
-                }
-            }
-        }
-    }
-
 
     private static final String NULL_READLINE_MESSAGE =
         "Unexpected EOF when reading from engine";
@@ -129,13 +100,13 @@ public class UCIEngine {
         engineIO.sendLine("ucinewgame");
     }
 
-    // This function stops the search as soon as possible and returns the most
-    // recent evaluation.
-    public int stop() {
-        return 0;
+    // This function stops the search as soon as possible.
+    public void stop() {
+        engineIO.sendLine("stop");
     }
 
     public UCIMove go(UCIGo searchParams) {
+        int lastScore = 0;
         engineIO.sendLine(searchParams.toString());
         while (true) {
             String response = engineIO.readLine();
@@ -146,8 +117,32 @@ public class UCIEngine {
             if (tokens.length != 0) {
                 if (tokens[0].equals("bestmove")) {
                     return new UCIMove(tokens[1]);
-                } else if (tokens.equals("info")) {
-
+                } else if (tokens[0].equals("info")) {
+                    // FIXME: Use new GoResult class
+                    /*boolean isMateScore = false;
+                    int scoreIndex = UCIUtils.findIndex(tokens, "cp");
+                    if (scoreIndex == -1) {
+                        scoreIndex = UCIUtils.find(tokens, "mate");
+                        isMateScore = true;
+                    }
+                    if (scoreIndex != -1) {
+                        if (scoreIndex + 1 < tokens.length) {
+                            if (scoreIndex + 2 < tokens.length) {
+                                switch (tokens[scoreIndex + 2]) {
+                                case "upperbound":
+                                case "lowerbound":
+                                    break;
+                                default:
+                                    lastScore = Integer
+                                        .parseInt(tokens[scoreIndex + 1]);
+                                    break;
+                                }
+                            } else {
+                                lastScore =
+                                    Integer.parseInt(tokens[scoreIndx + 1]);
+                            }
+                        }
+                    }*/
                 }
             }
         }
