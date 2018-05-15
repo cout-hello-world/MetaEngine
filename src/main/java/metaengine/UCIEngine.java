@@ -11,11 +11,10 @@ import java.util.ArrayList;
 
 public class UCIEngine {
 
-    private final Object mutex = new Object();
-
     private final Process engineProcess;
     private final String engineName;
     private List<UCIOption> options = null;
+    private final Object IOMutex = new Object();
     private final ProcessIO engineIO;
     private static final boolean DEBUG_IO = true;
 
@@ -95,23 +94,32 @@ public class UCIEngine {
     }
 
     public void sendOption(UCIOption opt) {
-        synchronized (mutex) {
+        synchronized (IOMutex) {
             engineIO.sendLine(opt.getSetoptionString());
         }
     }
 
     public void sendUcinewgame() {
-        synchronized (mutex) {
+        synchronized (IOMutex) {
             engineIO.sendLine("ucinewgame");
         }
     }
 
+    // This function stops the search as soon as possible and returns the most
+    // recent evaluation.
+    public int stop() {
+        return 0;
+    }
+
     public UCIMove go(UCIGo searchParams) {
-        // FIXME: This implementation makes it difficult to support "stop"
-        synchronized (mutex) {
+        synchronized (IOMutex) {
             engineIO.sendLine(searchParams.toString());
+        }
             while (true) {
-                String response = engineIO.readLine();
+                String response;
+                synchronized (IOMutex) {
+                    response = engineIO.readLine();
+                }
                 if (response == null) {
                     throw new RuntimeException(NULL_READLINE_MESSAGE);
                 }
@@ -122,11 +130,10 @@ public class UCIEngine {
                     }
                 }
             }
-        }
     }
 
     public void synchronize() {
-        synchronized (mutex) {
+        synchronized (IOMutex) {
             engineIO.sendLine("isready");
             String response = "";
             while (true) {
@@ -143,13 +150,13 @@ public class UCIEngine {
     }
 
     public void position(UCIPosition pos) {
-        synchronized (mutex) {
+        synchronized (IOMutex) {
             engineIO.sendLine("position " + pos.toString());
         }
     }
 
     public void quit() {
-        synchronized (mutex) {
+        synchronized (IOMutex) {
             engineIO.sendLine("quit");
         }
     }
