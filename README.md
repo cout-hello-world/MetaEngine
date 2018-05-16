@@ -19,13 +19,12 @@ In a perfect world, the above would be enough, but as of the time of this
 writing, you must also create a link to the Ivy jar in a place that Ant can
 find it:
 ```
-mkdir -p $HOME/.ant/lib
-ln -s /usr/share/java/ivy.jar $HOME/.ant/lib/
+mkdir -p "$HOME/.ant/lib/"
+ln -s /usr/share/java/ivy.jar "$HOME/.ant/lib/"
 ```
 assuming `ivy.jar` is in `/usr/share/java/`
 
 ### Building
-
 Build with the command `ant`. This should
 create an executable jar in the `target` directory.
 

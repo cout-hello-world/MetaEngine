@@ -105,9 +105,9 @@ public class UCIEngine {
         engineIO.sendLine("stop");
     }
 
-    public UCIMove go(UCIGo searchParams) {
-        int lastScore = 0;
+    public GoResult go(UCIGo searchParams) {
         engineIO.sendLine(searchParams.toString());
+        GoResult.Score lastScore = new GoResult.Score(Integer.MIN_VALUE, true);
         while (true) {
             String response = engineIO.readLine();
             if (response == null) {
@@ -116,33 +116,28 @@ public class UCIEngine {
             String[] tokens = UCIUtils.tokenize(response);
             if (tokens.length != 0) {
                 if (tokens[0].equals("bestmove")) {
-                    return new UCIMove(tokens[1]);
+                    // Consider handling error case (no tokens[1])
+                    return new GoResult(lastScore, new UCIMove(tokens[1]));
                 } else if (tokens[0].equals("info")) {
-                    // FIXME: Use new GoResult class
-                    /*boolean isMateScore = false;
-                    int scoreIndex = UCIUtils.findIndex(tokens, "cp");
-                    if (scoreIndex == -1) {
-                        scoreIndex = UCIUtils.find(tokens, "mate");
-                        isMateScore = true;
+                    boolean mate = false;
+                    int idx = UCIUtils.findIndex(tokens, "cp");
+                    if (idx == -1) {
+                        idx = UCIUtils.findIndex(tokens, "mate");
+                        mate = true;
                     }
-                    if (scoreIndex != -1) {
-                        if (scoreIndex + 1 < tokens.length) {
-                            if (scoreIndex + 2 < tokens.length) {
-                                switch (tokens[scoreIndex + 2]) {
-                                case "upperbound":
-                                case "lowerbound":
-                                    break;
-                                default:
-                                    lastScore = Integer
-                                        .parseInt(tokens[scoreIndex + 1]);
-                                    break;
-                                }
-                            } else {
-                                lastScore =
-                                    Integer.parseInt(tokens[scoreIndx + 1]);
+                    if (idx != -1 && idx + 1 < tokens.length) {
+                        int value = Integer.parseInt(tokens[idx + 1]);
+                        boolean replace = true;
+                        if (idx + 2 < tokens.length) {
+                            if (tokens[idx + 2].equals("lowerbound") ||
+                                tokens[idx + 2].equals("upperbound")) {
+                                replace = false;
                             }
                         }
-                    }*/
+                        if (replace) {
+                            lastScore = new GoResult.Score(value, mate);
+                        }
+                    }
                 }
             }
         }

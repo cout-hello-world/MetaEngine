@@ -25,6 +25,14 @@ public class GoResult {
             }
         }
 
+        public Score getBiasedScore(int bias) {
+            if (isMateScore()) {
+                return new Score(comparisonScore, true);
+            } else {
+                return new Score(comparisonScore + bias);
+            }
+        }
+
         @Override
         public boolean equals(Object other) {
             if (other == null || !(other instanceof Score)) {
