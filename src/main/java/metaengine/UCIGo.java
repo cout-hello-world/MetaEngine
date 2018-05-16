@@ -13,6 +13,9 @@ public class UCIGo {
         MOVESTOGO, DEPTH, NODES, MATE, MOVETIME
     }
 
+    private static final String[] infiniteArray = {"go", "infinite"};
+    public static final UCIGo INFINITE = new UCIGo(infiniteArray);
+
     public UCIGo(String[] tokens) {
         State st = State.BEFORE_GO;
         for (String token : tokens) {

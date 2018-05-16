@@ -126,24 +126,51 @@ public class UCIEnginesManager {
         }
     }
 
-    private class SearchThread extends Thread {
+    private class Searcher implements Runnable {
         private final SearchInfo info;
         private final UCIGo goInfo;
-        public SearchThread(SearchInfo info, UCIGo goInfo) {
+        public Searcher(SearchInfo info, UCIGo goInfo) {
             this.info = info;
             this.goInfo = goInfo;
         }
 
         @Override
         public void run() {
-            UCIGo timerGo = goInfo.getConvertedForTimer();
-            UCIEngine timerEngine = timerRecord.getEngine();
-            timerEngine.go(timerGo);
-            long timerStart = System.nanoTime();
-            for (EngineRecord rec : recomenderRecords) {
-                Configuration.EngineConfiguration conf = rec.getConfig();
+            try {
+                UCIGo timerGo = goInfo.getConvertedForTimer();
+                UCIEngine timerEngine = timerRecord.getEngine();
 
-                // TODO: We're not in Kansas anymore
+                Future<GoResult> timerFuture = Main.threadPool.submit(() -> {
+                    return timerEngine.go(timerGo);
+                });
+                long timerStart = System.nanoTime();
+
+                List<Future<GoResult>> recommenderFutures = new ArrayList<>();
+                for (EngineRecord rec : recomenderRecords) {
+                    Configuration.EngineConfiguration conf = rec.getConfig();
+                    UCIEngine engine = rec.getEngine();
+                    recommenderFutures.add(Main.threadPool.submit(() -> {
+                        return engine.go(UCIGo.INFINITE);
+                    }));
+                }
+                GoResult timerResult = timerFuture.get();
+                long timerTime = System.nanoTime() - timerStart;
+                for (EngineRecord rec : recomenderRecords) {
+                    rec.getEngine().stop();
+                }
+                List<GoResult> recResults = new ArrayList<>();
+                for (Future<GoResult> fut : recommenderFutures) {
+                    recResults.add(fut.get());
+                }
+
+                // It must be the case that
+                // 1 + recomenderRecords.length == judgeRecords.length
+                // Get judge scores with searchmoves
+
+                // Finally, compare scores adjusted for bias.
+            } catch (Exception e) { // TODO: Real exception handling?
+                throw new RuntimeException(
+                    "Unexpected Exception in Searcher.run()", e);
             }
         }
     }
@@ -158,7 +185,7 @@ public class UCIEnginesManager {
 
     public SearchInfo search(UCIGo params) {
         SearchInfo result = new SearchInfo();
-        Main.threadPool.submit(new SearchThread(result, params));
+        Main.threadPool.submit(new Searcher(result, params));
         return result;
     }
 
@@ -169,8 +196,8 @@ public class UCIEnginesManager {
     }
 
     public void quitAll() {
-            for (EngineRecord rec : enginesList) {
-                rec.getEngine().quit();
-            }
+        for (EngineRecord rec : enginesList) {
+            rec.getEngine().quit();
         }
+    }
 }
