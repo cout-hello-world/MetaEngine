@@ -8,7 +8,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class Main {
+    private Main() { }
+    public static ExecutorService threadPool = Executors.newCachedThreadPool();
 
     private static String readUTF8FileAsString(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
@@ -23,6 +28,11 @@ public class Main {
             System.exit(1);
             return;
         }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            threadPool.shutdownNow();
+        }));
+
         switch (args[0]) {
         case "-h":
         case "--help":

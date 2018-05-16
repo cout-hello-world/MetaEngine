@@ -23,9 +23,7 @@ public class UCIEnginesManager {
     public static UCIEnginesManager create(Configuration conf)
       throws InvalidConfigurationException {
         try {
-            ExecutorService pool =
-              Executors.newCachedThreadPool();
-              List<Configuration.EngineConfiguration> engineConfigs =
+            List<Configuration.EngineConfiguration> engineConfigs =
                 conf.getEngineConfigurations();
 
             List<Future<EngineRecord>> futureEngines =
@@ -35,17 +33,12 @@ public class UCIEnginesManager {
                     return new EngineRecord(new UCIEngine(
                       engineConf.getEngineArgv()), engineConf);
                 };
-                futureEngines.add(pool.submit(constructEngine));
+                futureEngines.add(Main.threadPool.submit(constructEngine));
             }
 
             List<EngineRecord> engines = new ArrayList<EngineRecord>();
             for (Future<EngineRecord> future : futureEngines) {
                 engines.add(future.get());
-            }
-
-            pool.shutdown();
-            if (!pool.awaitTermination(1, TimeUnit.SECONDS)) {
-                pool.shutdownNow();
             }
 
             return new UCIEnginesManager(engines);
@@ -143,8 +136,9 @@ public class UCIEnginesManager {
 
         @Override
         public void run() {
+            UCIGo timerGo = goInfo.getConvertedForTimer();
             UCIEngine timerEngine = timerRecord.getEngine();
-            //timerEngine.go();
+            timerEngine.go(timerGo);
             long timerStart = System.nanoTime();
             for (EngineRecord rec : recomenderRecords) {
                 Configuration.EngineConfiguration conf = rec.getConfig();
@@ -164,14 +158,14 @@ public class UCIEnginesManager {
 
     public SearchInfo search(UCIGo params) {
         SearchInfo result = new SearchInfo();
-        new SearchThread(result, params).run();
+        Main.threadPool.submit(new SearchThread(result, params));
         return result;
     }
 
     public void synchronizeAll() {
-            for (EngineRecord rec : enginesList) {
-                rec.getEngine().synchronize();
-            }
+        for (EngineRecord rec : enginesList) {
+            rec.getEngine().synchronize();
+        }
     }
 
     public void quitAll() {
