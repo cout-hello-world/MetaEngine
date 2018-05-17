@@ -190,7 +190,20 @@ public class UCIEnginesManager {
                     judgeResults.add(fut.get());
                 }
 
-                // Finally, compare scores adjusted for bias.
+                int bestIndex = 0;
+                GoResult.Score bestScore =
+                    new GoResult.Score(Integer.MIN_VALUE);
+                for (int i = 0; i != judgeResults.size(); ++i) {
+                    GoResult.Score origScore = judgeResults.get(i).getScore();
+                    GoResult.Score score = origScore.getBiasedScore(
+                        recomenderRecords.get(i).getConfig().getBias());
+                    if (score.compareTo(bestScore) >= 0) {
+                        bestScore = score;
+                        bestIndex = i;
+                    }
+                }
+
+                info.setBestMove(recResults.get(bestIndex).getMove());
             } catch (Exception e) { // TODO: Real exception handling?
                 throw new RuntimeException(
                     "Unexpected Exception in Searcher.run()", e);
