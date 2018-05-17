@@ -3,6 +3,7 @@ package metaengine;
 public class GoResult {
     private final Score score;
     private final UCIMove move;
+    private static final int MATE_CUTOFF = 100;
     public GoResult(Score score, UCIMove move) {
         this.score = score;
         this.move = move;
@@ -41,6 +42,16 @@ public class GoResult {
             }
         }
 
+        public Score flip() {
+            if (comparisonScore > Integer.MAX_VALUE - MATE_CUTOFF) {
+                return new Score(comparisonScore - Integer.MAX_VALUE, true);
+            } else if (comparisonScore < Integer.MIN_VALUE + MATE_CUTOFF) {
+                return new Score(comparisonScore - Integer.MIN_VALUE, true);
+            } else {
+                return new Score(-comparisonScore);
+            }
+        }
+
         @Override
         public boolean equals(Object other) {
             if (other == null || !(other instanceof Score)) {
@@ -62,9 +73,9 @@ public class GoResult {
 
         @Override
         public String toString() {
-            if (comparisonScore > Integer.MAX_VALUE - 100) {
+            if (comparisonScore > Integer.MAX_VALUE - MATE_CUTOFF) {
                 return "mate " + (Integer.MAX_VALUE - comparisonScore);
-            } else if (comparisonScore < Integer.MIN_VALUE + 100) {
+            } else if (comparisonScore < Integer.MIN_VALUE + MATE_CUTOFF) {
                 return "mate " + (Integer.MIN_VALUE - comparisonScore);
             } else {
                 return "cp " + comparisonScore;
@@ -72,8 +83,8 @@ public class GoResult {
         }
 
         public boolean isMateScore() {
-            return comparisonScore > Integer.MAX_VALUE - 100 ||
-                   comparisonScore < Integer.MIN_VALUE + 100;
+            return comparisonScore > Integer.MAX_VALUE - MATE_CUTOFF ||
+                   comparisonScore < Integer.MIN_VALUE + MATE_CUTOFF;
         }
     }
 }

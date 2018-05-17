@@ -10,8 +10,6 @@ import java.util.ArrayList;
 
 
 public class UCIEngine {
-    private static final boolean DEBUG_IO = false;
-
     private final Process engineProcess;
     private final String engineName;
     private List<UCIOption> options = null;
@@ -30,7 +28,7 @@ public class UCIEngine {
         ProcessBuilder pb = new ProcessBuilder(argv);
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         engineProcess = pb.start();
-        engineIO = new ProcessIO(engineProcess, engineName, DEBUG_IO);
+        engineIO = new ProcessIO(engineProcess, engineName);
         populateOptions();
     }
 
@@ -159,7 +157,7 @@ public class UCIEngine {
     }
 
     public void position(UCIPosition pos) {
-        engineIO.sendLine("position " + pos.toString());
+        engineIO.sendLine(pos.toString());
     }
 
     public void quit() {

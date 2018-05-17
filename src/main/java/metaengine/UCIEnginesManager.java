@@ -20,6 +20,7 @@ public class UCIEnginesManager {
     private final List<EngineRecord> enginesList;
     private final List<EngineRecord> recomenderRecords = new ArrayList<>();
     private final List<EngineRecord> judgeRecords = new ArrayList<>();
+    private UCIPosition currentPosition = UCIPosition.STARTPOS;
 
     public static UCIEnginesManager create(Configuration conf)
       throws InvalidConfigurationException {
@@ -182,12 +183,13 @@ public class UCIEnginesManager {
                 for (int i = 0; i != judgeRecords.size(); ++i) {
                     UCIEngine judge = judgeRecords.get(i).getEngine();
                     String[] goCtorParam = {
-                        "go", "searchmoves",
-                        recResults.get(i).getMove().toString(),
-                        "movetime",
+                        "go", "movetime",
                         Long.toString(timerTime / 1000000L)
                     };
+                    UCIPosition judgePosition =
+                        currentPosition.plus(recResults.get(i).getMove());
                     judgeFutures.add(Main.threadPool.submit(() -> {
+                        judge.position(judgePosition);
                         return judge.go(new UCIGo(goCtorParam));
                     }));
                 }
@@ -201,7 +203,8 @@ public class UCIEnginesManager {
                 GoResult.Score bestScore =
                     new GoResult.Score(Integer.MIN_VALUE);
                 for (int i = 0; i != judgeResults.size(); ++i) {
-                    GoResult.Score origScore = judgeResults.get(i).getScore();
+                    GoResult.Score origScore =
+                        judgeResults.get(i).getScore().flip();
                     GoResult.Score score = origScore.getBiasedScore(
                         recomenderRecords.get(i).getConfig().getBias());
                     if (score.compareTo(bestScore) >= 0) {
@@ -223,11 +226,11 @@ public class UCIEnginesManager {
             UCIEngine engine = rec.getEngine();
             engine.position(pos);
         }
+        currentPosition = pos;
     }
 
 
     public Future<UCIMove> search(UCIGo params) {
-        SearchInfo result = new SearchInfo();
         return Main.threadPool.submit(new Searcher(params));
     }
 
