@@ -63,7 +63,6 @@ public class UCI {
             String cmd = tokens[0];
 
 
-            Future<UCIMove> searchFuture = null;
             switch (state) {
             case BEFORE_UCI:
                 if (cmd.equals("uci")) {
@@ -90,7 +89,18 @@ public class UCI {
                 if (cmd.equals("quit")) {
                     loop = false;
                 } if (cmd.equals("go")) {
-                    searchFuture = engines.search(new UCIGo(tokens));
+                    Future<UCIMove> searchFuture =
+                        engines.search(new UCIGo(tokens));
+                    Main.threadPool.submit(() -> {
+                        try {
+                            System.out.println("bestmove " +
+                                searchFuture.get().toString());
+                        } catch (Exception e) {
+                            throw new RuntimeException(
+                              "Unexpected exception thrown getting go result",
+                              e);
+                        }
+                    });
                 } else if (cmd.equals("position")) {
                     engines.setPosition(new UCIPosition(tokens));
                 }

@@ -43,7 +43,7 @@ public class ProcessIO {
             throw new RuntimeException("Unexpted error reading from process");
         }
         if (debug) {
-            String toPrint = "Read \"" + result + "\"";
+            String toPrint = "DEBUG: Read \"" + result + "\"";
             if (name != null) {
                 toPrint += " from \"" + name + "\"";
             }
@@ -57,7 +57,7 @@ public class ProcessIO {
             toProc.println(line);
         }
         if (debug) {
-            String toPrint = "Sent \"" + line + "\"";
+            String toPrint = "DEGUG: Sent \"" + line + "\"";
             if (name != null) {
                 toPrint += " to \"" + name + "\"";
             }
