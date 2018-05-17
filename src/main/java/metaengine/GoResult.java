@@ -8,6 +8,14 @@ public class GoResult {
         this.move = move;
     }
 
+    public UCIMove getMove() {
+        return move;
+    }
+
+    public Score getScore() {
+        return score;
+    }
+
     public final static class Score implements Comparable<Score> {
         private final int comparisonScore;
         public Score(int score) {

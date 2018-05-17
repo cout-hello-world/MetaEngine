@@ -153,12 +153,12 @@ public class UCIEnginesManager {
                         return engine.go(UCIGo.INFINITE);
                     }));
                 }
-                GoResult timerResult = timerFuture.get();
+                List<GoResult> recResults = new ArrayList<>();
+                recResults.add(timerFuture.get());
                 long timerTime = System.nanoTime() - timerStart;
                 for (EngineRecord rec : recomenderRecords) {
                     rec.getEngine().stop();
                 }
-                List<GoResult> recResults = new ArrayList<>();
                 for (Future<GoResult> fut : recommenderFutures) {
                     recResults.add(fut.get());
                 }
@@ -166,6 +166,24 @@ public class UCIEnginesManager {
                 // It must be the case that
                 // 1 + recomenderRecords.length == judgeRecords.length
                 // Get judge scores with searchmoves
+                List<Future<GoResult>> judgeFutures = new ArrayList<>();
+                for (int i = 0; i != judgeRecords.size(); ++i) {
+                    UCIEngine judge = judgeRecords.get(i).getEngine();
+                    String[] goCtorParam = {
+                        "go", "searchmoves",
+                        recResults.get(i).getMove().toString(),
+                        "movetime",
+                        Long.toString(timerTime / 1000000L)
+                    };
+                    judgeFutures.add(Main.threadPool.submit(() -> {
+                        return judge.go(new UCIGo(goCtorParam));
+                    }));
+                }
+
+                List<GoResult> judgeResults = new ArrayList<>();
+                for (Future<GoResult> fut : judgeFutures) {
+                    judgeResults.add(fut.get());
+                }
 
                 // Finally, compare scores adjusted for bias.
             } catch (Exception e) { // TODO: Real exception handling?
