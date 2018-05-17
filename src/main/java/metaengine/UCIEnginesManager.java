@@ -14,6 +14,8 @@ import java.io.IOException;
 
 public class UCIEnginesManager {
 
+    private static final boolean DEBUG = true;
+
     // Member variables
     private final List<EngineRecord> enginesList;
     private final List<EngineRecord> recomenderRecords = new ArrayList<>();
@@ -135,7 +137,14 @@ public class UCIEnginesManager {
         @Override
         public UCIMove call() {
             try {
+                if (DEBUG) {
+                    System.err.println("DEBUG: goInfo: " +
+                        goInfo.toString());
+                }
                 UCIGo timerGo = goInfo.getConvertedForTimer();
+                if (DEBUG) {
+                    System.err.println("DEBUG: timerGo: " + timerGo.toString());
+                }
                 UCIEngine timerEngine = recomenderRecords.get(0).getEngine();
 
                 Future<GoResult> timerFuture = Main.threadPool.submit(() -> {

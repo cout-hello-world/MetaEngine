@@ -7,3 +7,6 @@ Ideas:
 
 
 - Use UCIOptionBundle to return an engine name/index + associated options.
+
+
+- Check ucinewgame implementation

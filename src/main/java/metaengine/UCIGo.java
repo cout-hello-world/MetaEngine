@@ -59,6 +59,7 @@ public class UCIGo {
                     st = State.MATE;
                     break;
                 case "movetime":
+                    System.err.println("DEBUG: Going to movetime");
                     st = State.MOVETIME;
                     break;
                 case "infinite":
@@ -102,8 +103,10 @@ public class UCIGo {
             case MATE:
                 mate = UCIUtils.tryParseUnsigned(token);
                 st = State.EXPECT_COMMAND;
+                break;
             case MOVETIME:
                 movetime = UCIUtils.tryParseUnsigned(token);
+                System.err.println("DEBUG: movetime: " + movetime);
                 st = State.EXPECT_COMMAND;
                 break;
             }
@@ -216,6 +219,9 @@ public class UCIGo {
         }
         if (mate != -1) {
             builder.append(" mate " + mate);
+        }
+        if (movetime != -1) {
+            builder.append(" movetime " + movetime);
         }
         if (infinite) {
             builder.append(" infinite");
