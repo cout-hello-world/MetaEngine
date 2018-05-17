@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 
 public class UCIEngine {
-    private static final boolean DEBUG_IO = true;
+    private static final boolean DEBUG_IO = false;
 
     private final Process engineProcess;
     private final String engineName;

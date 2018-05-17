@@ -59,7 +59,6 @@ public class UCIGo {
                     st = State.MATE;
                     break;
                 case "movetime":
-                    System.err.println("DEBUG: Going to movetime");
                     st = State.MOVETIME;
                     break;
                 case "infinite":
@@ -106,7 +105,6 @@ public class UCIGo {
                 break;
             case MOVETIME:
                 movetime = UCIUtils.tryParseUnsigned(token);
-                System.err.println("DEBUG: movetime: " + movetime);
                 st = State.EXPECT_COMMAND;
                 break;
             }
@@ -157,6 +155,9 @@ public class UCIGo {
             if (res.wtime != -1) {
                 res.wtime /= 2;
             }
+            if (res.btime != -1) {
+                res.btime /= 2;
+            }
             break;
         case MOVETIME:
             if (res.movetime != -1) {
@@ -180,6 +181,7 @@ public class UCIGo {
         wtime = orig.wtime;
         btime = orig.btime;
         winc = orig.winc;
+        binc = orig.binc;
         movestogo = orig.movestogo;
         depth = orig.depth;
         mate = orig.mate;

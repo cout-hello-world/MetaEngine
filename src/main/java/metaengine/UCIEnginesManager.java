@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class UCIEnginesManager {
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     // Member variables
     private final List<EngineRecord> enginesList;
