@@ -18,7 +18,6 @@ public class UCIEnginesManager {
     private final List<EngineRecord> enginesList;
     private final List<EngineRecord> recomenderRecords = new ArrayList<>();
     private final List<EngineRecord> judgeRecords = new ArrayList<>();
-    private EngineRecord timerRecord = null;
 
     public static UCIEnginesManager create(Configuration conf)
       throws InvalidConfigurationException {
@@ -77,22 +76,23 @@ public class UCIEnginesManager {
              EngineRoles roles = rec.getConfig().getEngineRoles();
 
              if (roles.isTimer()) {
-                 timerRecord = rec;
-             } else {
-                 if (roles.isRecomender()) {
-                     recomenderRecords.add(rec);
-                 }
-                 if (roles.isJudge()) {
-                     judgeRecords.add(rec);
-                 }
-            }
-        }
+                 recomenderRecords.add(rec);
+                 break;
+             }
+         }
+         for (EngineRecord rec : enginesList) {
+             EngineRoles roles = rec.getConfig().getEngineRoles();
+             if (roles.isTimer()) {
+                 continue;
+             }
+             if (roles.isRecomender()) {
+                 recomenderRecords.add(rec);
+             } else if (roles.isJudge()) {
+                 judgeRecords.add(rec);
+             }
+         }
 
-        // There is one timer which is also implicitly a recomender
-        if (timerRecord == null) {
-            throw new InvalidConfigurationException("There must be a timer");
-        }
-        if (recomenderRecords.size() + 1 != judgeRecords.size()) {
+        if (recomenderRecords.size() != judgeRecords.size()) {
             throw new InvalidConfigurationException(
               "There must be the same number of recomenders as judges");
         }
@@ -138,15 +138,20 @@ public class UCIEnginesManager {
         public void run() {
             try {
                 UCIGo timerGo = goInfo.getConvertedForTimer();
-                UCIEngine timerEngine = timerRecord.getEngine();
+                UCIEngine timerEngine = recomenderRecords.get(0).getEngine();
 
                 Future<GoResult> timerFuture = Main.threadPool.submit(() -> {
                     return timerEngine.go(timerGo);
                 });
                 long timerStart = System.nanoTime();
 
+                boolean firstIter = true;
                 List<Future<GoResult>> recommenderFutures = new ArrayList<>();
                 for (EngineRecord rec : recomenderRecords) {
+                    if (firstIter) {
+                        firstIter = false;
+                        continue;
+                    }
                     Configuration.EngineConfiguration conf = rec.getConfig();
                     UCIEngine engine = rec.getEngine();
                     recommenderFutures.add(Main.threadPool.submit(() -> {
@@ -164,7 +169,7 @@ public class UCIEnginesManager {
                 }
 
                 // It must be the case that
-                // 1 + recomenderRecords.length == judgeRecords.length
+                // recomenderRecords.length == judgeRecords.length
                 // Get judge scores with searchmoves
                 List<Future<GoResult>> judgeFutures = new ArrayList<>();
                 for (int i = 0; i != judgeRecords.size(); ++i) {
