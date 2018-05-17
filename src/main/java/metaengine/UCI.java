@@ -7,6 +7,8 @@ import java.io.PrintStream;
 
 import java.util.List;
 
+import java.util.concurrent.Future;
+
 public class UCI {
     private final UCIEnginesManager engines;
     private final List<UCIOptionBundle> optionBundles;
@@ -61,7 +63,7 @@ public class UCI {
             String cmd = tokens[0];
 
 
-            SearchInfo info = new SearchInfo();
+            Future<UCIMove> searchFuture = null;
             switch (state) {
             case BEFORE_UCI:
                 if (cmd.equals("uci")) {
@@ -88,7 +90,7 @@ public class UCI {
                 if (cmd.equals("quit")) {
                     loop = false;
                 } if (cmd.equals("go")) {
-                    info = engines.search(new UCIGo(tokens));
+                    searchFuture = engines.search(new UCIGo(tokens));
                 } else if (cmd.equals("position")) {
                     engines.setPosition(new UCIPosition(tokens));
                 }

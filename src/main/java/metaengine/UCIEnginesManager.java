@@ -126,16 +126,14 @@ public class UCIEnginesManager {
         }
     }
 
-    private class Searcher implements Runnable {
-        private final SearchInfo info;
+    private class Searcher implements Callable<UCIMove> {
         private final UCIGo goInfo;
-        public Searcher(SearchInfo info, UCIGo goInfo) {
-            this.info = info;
+        public Searcher(UCIGo goInfo) {
             this.goInfo = goInfo;
         }
 
         @Override
-        public void run() {
+        public UCIMove call() {
             try {
                 UCIGo timerGo = goInfo.getConvertedForTimer();
                 UCIEngine timerEngine = recomenderRecords.get(0).getEngine();
@@ -203,7 +201,7 @@ public class UCIEnginesManager {
                     }
                 }
 
-                info.setBestMove(recResults.get(bestIndex).getMove());
+                return recResults.get(bestIndex).getMove();
             } catch (Exception e) { // TODO: Real exception handling?
                 throw new RuntimeException(
                     "Unexpected Exception in Searcher.run()", e);
@@ -219,10 +217,9 @@ public class UCIEnginesManager {
     }
 
 
-    public SearchInfo search(UCIGo params) {
+    public Future<UCIMove> search(UCIGo params) {
         SearchInfo result = new SearchInfo();
-        Main.threadPool.submit(new Searcher(result, params));
-        return result;
+        return Main.threadPool.submit(new Searcher(params));
     }
 
     public void synchronizeAll() {
