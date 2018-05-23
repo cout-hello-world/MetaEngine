@@ -8,7 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 public class ProcessIO {
-    private static final boolean DEBUG_WRITES = false;
+    private static final boolean DEBUG_WRITES = true;
     private static final boolean DEBUG_READS = false;
     private final Object readMutex = new Object();
     private final BufferedReader fromProc;

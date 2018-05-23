@@ -26,8 +26,14 @@
             "copies": 1
         },
         {
+            "argv": ["gnuchess", "-u"],
+            "roles": ["RECOMENDER"],
+            "bias": 5
+        },
+        {
             "argv": ["stockfish"],
-            "roles": ["JUDGE"]
+            "roles": ["JUDGE"],
+            "copies": 2
         }/*,
         {
             "argv": ["lczero", "-w weights-251.txt"],

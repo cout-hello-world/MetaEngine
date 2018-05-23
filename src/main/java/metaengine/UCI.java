@@ -103,6 +103,8 @@ public class UCI {
                     });
                 } else if (cmd.equals("position")) {
                     engines.setPosition(new UCIPosition(tokens));
+                } else if (cmd.equals("ucinewgame")) {
+                    engines.ucinewgameAll();
                 }
                 break;
             }

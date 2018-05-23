@@ -240,6 +240,12 @@ public class UCIEnginesManager {
         }
     }
 
+    public void ucinewgameAll() {
+        for (EngineRecord rec : enginesList) {
+            rec.getEngine().sendUcinewgame();
+        }
+    }
+
     public void quitAll() {
         for (EngineRecord rec : enginesList) {
             rec.getEngine().quit();
