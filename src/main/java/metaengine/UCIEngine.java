@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public class UCIEngine {
     private final Process engineProcess;
     private final String engineName;
+    private final int engineIndex;
     private List<UCIOption> options = null;
     private final ProcessIO engineIO;
 
@@ -19,16 +20,17 @@ public class UCIEngine {
         "Unexpected EOF when reading from engine";
 
     // All constructors should ultimatly delagate to this one.
-    public UCIEngine (List<String> argv)
+    public UCIEngine (List<String> argv, int index)
             throws IOException {
         // It is okay to use argv without copying because the ProcessBuilder
         // is not maintained after this call.
         engineName = Paths.get(argv.get(0)).getFileName().toString()
                      .replaceAll("\\s", "");
+        engineIndex = index;
         ProcessBuilder pb = new ProcessBuilder(argv);
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         engineProcess = pb.start();
-        engineIO = new ProcessIO(engineProcess, engineName);
+        engineIO = new ProcessIO(engineProcess, engineIndex + " " + engineName);
         populateOptions();
     }
 
@@ -38,8 +40,8 @@ public class UCIEngine {
         return argv;
     }
 
-    public UCIEngine(File pathToEngine) throws IOException {
-        this(fileToArgv(pathToEngine));
+    public UCIEngine(File pathToEngine, int index) throws IOException {
+        this(fileToArgv(pathToEngine), index);
     }
 
     private static List<String> stringsToList(String engine, String... args) {
@@ -58,8 +60,8 @@ public class UCIEngine {
         return engineName;
     }
 
-    public UCIEngine(String engine, String... args) throws IOException {
-        this(stringsToList(engine, args));
+    public UCIEngine(int index, String engine, String... args) throws IOException {
+        this(stringsToList(engine, args), index);
     }
 
     public List<UCIOption> getOptions() {
