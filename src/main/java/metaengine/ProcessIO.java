@@ -35,7 +35,7 @@ public class ProcessIO {
             throw new RuntimeException("Unexpted error reading from process");
         }
         if (DEBUG_READS) {
-            String toPrint = "DEBUG: " + name + "< " + result;
+            String toPrint = "<" + name + " " + result;
             System.err.println(toPrint);
         }
         return result;
@@ -46,7 +46,7 @@ public class ProcessIO {
             toProc.println(line);
         }
         if (DEBUG_WRITES) {
-            String toPrint = "DEBUG: " + name + "> " + line;
+            String toPrint = ">" + name + " " + line;
             System.err.println(toPrint);
         }
     }

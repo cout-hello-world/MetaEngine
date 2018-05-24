@@ -135,7 +135,8 @@ public class UCIGo {
     }
 
     // How much less time do we tell ourselves that we have than we actually do
-    private static final int TIME_LIE = 500;
+    private static final int TIME_LIE = 600000;
+    private static final int TIME_LIE_FACTOR = 3;
 
     /**
      * This function converts a UCIGo from an input UCIGo to one suitable for
@@ -155,18 +156,21 @@ public class UCIGo {
                 res.binc /= 2;
             }
             if (res.wtime != -1) {
-                res.wtime = Math.max(res.wtime - TIME_LIE, 1);
+                res.wtime = Math.max(res.wtime - TIME_LIE,
+                                     res.wtime / TIME_LIE_FACTOR);
                 res.wtime /= 2;
             }
             if (res.btime != -1) {
-                res.btime = Math.max(res.btime - TIME_LIE, 1);
+                res.btime = Math.max(res.btime - TIME_LIE,
+                                     res.wtime / TIME_LIE_FACTOR);
                 res.btime /= 2;
             }
 
             break;
         case MOVETIME:
             if (res.movetime != -1) {
-                res.movetime = Math.max(res.movetime - TIME_LIE, 1);
+                res.movetime = Math.max(res.movetime - TIME_LIE,
+                                        res.movetime / TIME_LIE_FACTOR);
                 res.movetime /= 2;
             }
             break;
