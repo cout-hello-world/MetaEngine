@@ -12,7 +12,6 @@ import java.util.ArrayList;
 public class UCIEngine {
     private final Process engineProcess;
     private final String engineName;
-    private final int engineIndex;
     private List<UCIOption> options = null;
     private final ProcessIO engineIO;
 
@@ -20,17 +19,20 @@ public class UCIEngine {
         "Unexpected EOF when reading from engine";
 
     // All constructors should ultimatly delagate to this one.
-    public UCIEngine (List<String> argv, int index)
+    public UCIEngine(Configuration.EngineConfiguration ec)
             throws IOException {
         // It is okay to use argv without copying because the ProcessBuilder
         // is not maintained after this call.
+        List<String> argv = ec.getEngineArgv();
         engineName = Paths.get(argv.get(0)).getFileName().toString()
                      .replaceAll("\\s", "");
-        engineIndex = index;
+        int engineIndex = ec.getIndex();
         ProcessBuilder pb = new ProcessBuilder(argv);
+        pb.directory(ec.getWorkingDirectory());
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         engineProcess = pb.start();
-        engineIO = new ProcessIO(engineProcess, engineIndex + " " + engineName);
+        engineIO = new ProcessIO(engineProcess, engineName +
+                                                "(" + engineIndex + ")");
         populateOptions();
     }
 
@@ -38,10 +40,6 @@ public class UCIEngine {
         List<String> argv = new ArrayList<String>();
         argv.add(file.getAbsolutePath());
         return argv;
-    }
-
-    public UCIEngine(File pathToEngine, int index) throws IOException {
-        this(fileToArgv(pathToEngine), index);
     }
 
     private static List<String> stringsToList(String engine, String... args) {
@@ -58,10 +56,6 @@ public class UCIEngine {
      */
     public String getName() {
         return engineName;
-    }
-
-    public UCIEngine(int index, String engine, String... args) throws IOException {
-        this(stringsToList(engine, args), index);
     }
 
     public List<UCIOption> getOptions() {

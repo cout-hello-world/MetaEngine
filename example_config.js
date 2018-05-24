@@ -26,7 +26,8 @@
             "copies": 1
         },
         {
-            "argv": ["gnuchess", "-u"],
+            "argv": ["lczero", "-w", "weights-330.txt"],
+            "dir": "/home/henry/weights",
             "roles": ["RECOMENDER"],
             "bias": 5
         },

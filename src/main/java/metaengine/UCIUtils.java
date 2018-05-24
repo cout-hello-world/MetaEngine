@@ -1,5 +1,7 @@
 package metaengine;
 
+import java.nio.file.Paths;
+
 /**
  * This class contains static pure functions which aid in the implementation of
  * the UCI protocol. This class should not be instantiated and it maintains no

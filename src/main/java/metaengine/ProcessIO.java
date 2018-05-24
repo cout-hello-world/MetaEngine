@@ -25,10 +25,6 @@ public class ProcessIO {
         this.name = name;
     }
 
-    public ProcessIO(Process proc) {
-        this(proc, null);
-    }
-
     public String readLine() {
         String result;
         try {
@@ -39,10 +35,7 @@ public class ProcessIO {
             throw new RuntimeException("Unexpted error reading from process");
         }
         if (DEBUG_READS) {
-            String toPrint = "DEBUG: Read \"" + result + "\"";
-            if (name != null) {
-                toPrint += " from \"" + name + "\"";
-            }
+            String toPrint = "DEBUG: " + name + "< " + line;
             System.err.println(toPrint);
         }
         return result;
@@ -53,10 +46,7 @@ public class ProcessIO {
             toProc.println(line);
         }
         if (DEBUG_WRITES) {
-            String toPrint = "DEBUG: Sent \"" + line + "\"";
-            if (name != null) {
-                toPrint += " to \"" + name + "\"";
-            }
+            String toPrint = "DEBUG: " + name + "> " + line;
             System.err.println(toPrint);
         }
     }

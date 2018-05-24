@@ -2,6 +2,7 @@ package metaengine;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.io.File;
 
 import com.google.gson.JsonParser;
 import com.google.gson.JsonElement;
@@ -15,8 +16,15 @@ public class Configuration {
         private final EngineRoles roles;
         private final int bias;
         private final int index;
-        public EngineConfiguration(List<String> argv, List<String> roles,
-                                   int bias, int index) {
+        private final File dir;
+
+        /*
+         * Note: dir can be null if the current working directory is desired.
+         * All other arguments must have valid values.
+         */
+        public EngineConfiguration(File dir, List<String> argv,
+                                   List<String> roles, int bias, int index) {
+            this.dir = dir;
             this.argv = argv;
             this.roles = new EngineRoles(roles);
             this.bias = bias;
@@ -25,6 +33,14 @@ public class Configuration {
 
         public List<String> getEngineArgv() {
             return argv;
+        }
+
+        /**
+         * @return The working directory for this engine or {@code null} for
+         * the current working directory.
+         */
+        public File getWorkingDirectory() {
+            return dir;
         }
 
         public EngineRoles getEngineRoles() {
@@ -157,6 +173,16 @@ public class Configuration {
                 argvStrings.add(argvArg.getAsString());
             }
 
+            File dir = null;
+            if (engineObject.has("dir")) {
+                JsonElement dirElement = engineObject.get("dir");
+                if (!dirElement.isJsonPrimitive()) {
+                    throw new InvalidConfigurationException(
+                      "\"dir\" element must be primative");
+                }
+                dir = new File(dirElement.getAsString());
+            }
+
             if (!engineObject.has("roles")) {
                 throw new InvalidConfigurationException(
                   "Engine object must have \"roles\" key");
@@ -187,7 +213,7 @@ public class Configuration {
 
             for (int i = 0; i != copies; ++i) {
                 engineConfigurationList.add(new EngineConfiguration(
-                  argvStrings, roleStrings, bias, index));
+                  dir, argvStrings, roleStrings, bias, index));
                 ++index;
             }
         }

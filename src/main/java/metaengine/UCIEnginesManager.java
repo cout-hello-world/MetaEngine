@@ -32,10 +32,8 @@ public class UCIEnginesManager {
               new ArrayList<Future<EngineRecord>>();
             for (Configuration.EngineConfiguration engineConf : engineConfigs) {
                 Callable<EngineRecord> constructEngine = () -> {
-                    return new EngineRecord(
-                      new UCIEngine(engineConf.getEngineArgv(),
-                                    engineConf.getIndex()),
-                      engineConf);
+                    return new EngineRecord(new UCIEngine(engineConf),
+                                            engineConf);
                 };
                 futureEngines.add(Main.threadPool.submit(constructEngine));
             }
