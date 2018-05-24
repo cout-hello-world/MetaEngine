@@ -134,6 +134,9 @@ public class UCIGo {
         return ponder;
     }
 
+    // How much less time do we tell ourselves that we have than we actually do
+    private static final int TIME_LIE = 500;
+
     /**
      * This function converts a UCIGo from an input UCIGo to one suitable for
      * a timer.
@@ -143,7 +146,6 @@ public class UCIGo {
     public UCIGo getConvertedForTimer() {
         SearchType searchType = getSearchType();
         UCIGo res = new UCIGo(this);
-
         switch (searchType) {
         case GAME:
             if (res.winc != -1) {
@@ -153,14 +155,18 @@ public class UCIGo {
                 res.binc /= 2;
             }
             if (res.wtime != -1) {
+                res.wtime = Math.max(res.wtime - TIME_LIE, 1);
                 res.wtime /= 2;
             }
             if (res.btime != -1) {
+                res.btime = Math.max(res.btime - TIME_LIE, 1);
                 res.btime /= 2;
             }
+
             break;
         case MOVETIME:
             if (res.movetime != -1) {
+                res.movetime = Math.max(res.movetime - TIME_LIE, 1);
                 res.movetime /= 2;
             }
             break;
