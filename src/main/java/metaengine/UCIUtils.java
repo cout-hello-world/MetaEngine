@@ -7,6 +7,16 @@ package metaengine;
  */
 public class UCIUtils {
     private UCIUtils() { } // enforce non-instantiation
+
+    // This is the number of milliseconds to take away from the judges to stay
+    // on time
+    private static final long TIMER_FUDGE_FACTOR = 20L;
+
+    public static long convertTimerTime(long timerTimeNanos) {
+        long result = timerTimeNanos / 1000000L - TIMER_FUDGE_FACTOR;
+        return Math.max(result, 1L);
+    }
+
     public static String[] tokenize(String line) {
         return line.trim().split("\\s+");
     }

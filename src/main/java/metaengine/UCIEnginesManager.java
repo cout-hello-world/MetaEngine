@@ -186,7 +186,7 @@ public class UCIEnginesManager {
                     UCIEngine judge = judgeRecords.get(i).getEngine();
                     String[] goCtorParam = {
                         "go", "movetime",
-                        Long.toString(timerTime / 1000000L)
+                        Long.toString(UCIUtils.convertTimerTime(timerTime))
                     };
                     UCIPosition judgePosition =
                         currentPosition.plus(recResults.get(i).getMove());
