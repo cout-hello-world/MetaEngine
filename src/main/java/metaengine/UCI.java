@@ -77,7 +77,6 @@ public class UCI {
                     loop = false;
                 } else if (cmd.equals("setoption")) {
                     // Assert length?
-                    System.err.println("in setoption processing");
                     engines.dispatchOption(new SetoptionInfo(tokens));
                 } else if (cmd.equals("isready")) {
                     engines.synchronizeAll();
@@ -88,7 +87,7 @@ public class UCI {
             case INITIALIZED:
                 if (cmd.equals("quit")) {
                     loop = false;
-                } if (cmd.equals("go")) {
+                } else if (cmd.equals("go")) {
                     Future<UCIMove> searchFuture =
                         engines.search(new UCIGo(tokens));
                     Main.threadPool.submit(() -> {
@@ -105,6 +104,9 @@ public class UCI {
                     engines.setPosition(new UCIPosition(tokens));
                 } else if (cmd.equals("ucinewgame")) {
                     engines.ucinewgameAll();
+                } else if (cmd.equals("isready")) {
+                    engines.synchronizeAll();
+                    out.println("readyok");
                 }
                 break;
             }
