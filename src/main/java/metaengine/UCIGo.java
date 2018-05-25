@@ -135,8 +135,8 @@ public class UCIGo {
     }
 
     // How much less time do we tell ourselves that we have than we actually do
-    private static final int TIME_LIE = 600000;
-    private static final int TIME_LIE_FACTOR = 3;
+    private static final int TIME_LIE = 10000;
+    private static final int TIME_LIE_FACTOR = 2;
 
     /**
      * This function converts a UCIGo from an input UCIGo to one suitable for

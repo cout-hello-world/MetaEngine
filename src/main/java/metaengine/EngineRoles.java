@@ -12,10 +12,10 @@ public class EngineRoles {
             case "TIMER":
                 timer = true;
                 break;
-            case "RECOMENDER":
+            case "GENERATOR":
                 recomender = true;
                 break;
-            case "JUDGE":
+            case "SELECTOR":
                 judge = true;
                 break;
             }

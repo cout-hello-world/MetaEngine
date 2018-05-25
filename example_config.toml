@@ -1,0 +1,16 @@
+# Example configuration file for MetaEngine
+# The first GENERATOR is implicitly the TIMER
+
+[[engine]]
+    argv = ["stockfish"]
+    roles = ["GENERATOR", "SELECTOR"]
+
+[[engine]]
+    argv = ["lczero", "-w", "weights-330.txt"]
+    dir = "/home/henry/weights"
+    roles = ["GENERATOR"]
+    bias = 5
+
+[[engine]]
+    argv = ["stockfish"]
+    roles = ["SELECTOR"]

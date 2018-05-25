@@ -57,6 +57,6 @@ public class Main {
     }
 
     private static void printHelp(PrintStream out) {
-        out.println("Usage: java -jar <MetaEngine_jar> <json_config_file>");
+        out.println("Usage: java -jar <MetaEngine_jar> <toml_config_file>");
     }
 }

@@ -75,29 +75,19 @@ public class UCIEnginesManager {
     private UCIEnginesManager(List<EngineRecord> toManage)
       throws InvalidConfigurationException {
         enginesList = toManage;
-        for (EngineRecord rec : enginesList) {
-             EngineRoles roles = rec.getConfig().getEngineRoles();
-
-             if (roles.isTimer()) {
-                 recomenderRecords.add(rec);
-                 break;
-             }
-         }
          for (EngineRecord rec : enginesList) {
              EngineRoles roles = rec.getConfig().getEngineRoles();
-             if (roles.isTimer()) {
-                 continue;
-             }
              if (roles.isRecomender()) {
                  recomenderRecords.add(rec);
-             } else if (roles.isJudge()) {
+             }
+             if (roles.isJudge()) {
                  judgeRecords.add(rec);
              }
          }
 
         if (recomenderRecords.size() != judgeRecords.size()) {
             throw new InvalidConfigurationException(
-              "There must be the same number of recomenders as judges");
+              "There must be the same number of generators as selectors");
         }
     }
 

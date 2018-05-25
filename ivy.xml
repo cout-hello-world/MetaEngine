@@ -6,7 +6,8 @@
         <conf name="test" extends="main"/>
     </configurations>
     <dependencies>
-        <dependency org="com.google.code.gson" name="gson" rev="2.8.4" conf="main->default"/>
+        <dependency org="com.moandjiezana.toml" name="toml4j" rev="0.7.2"
+            conf="main->default"/>
         <dependency org="junit" name="junit" rev="4.12" conf="test->default"/>
     </dependencies>
 </ivy-module>
