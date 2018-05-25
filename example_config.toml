@@ -3,7 +3,7 @@
 
 [[engine]]
     argv = ["stockfish"]
-    roles = ["GENERATOR", "SELECTOR"]
+    roles = ["GENERATOR", "EVALUATOR"]
 
 [[engine]]
     argv = ["lczero", "-w", "weights-330.txt"]
@@ -13,4 +13,4 @@
 
 [[engine]]
     argv = ["stockfish"]
-    roles = ["SELECTOR"]
+    roles = ["EVALUATOR"]

@@ -15,7 +15,7 @@ public class EngineRoles {
             case "GENERATOR":
                 recomender = true;
                 break;
-            case "SELECTOR":
+            case "EVALUATOR":
                 judge = true;
                 break;
             }
