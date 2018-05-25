@@ -94,9 +94,11 @@ public class Configuration {
             } else {
                 bias = biasLong.intValue();
             }
-            configs.add(new EngineConfiguration(dirFile, argv, roles,
-                                                bias, index));
-            ++index;
+            for (int j = 0; j != copies; ++j) {
+                configs.add(new EngineConfiguration(dirFile, argv, roles,
+                                                    bias, index));
+                ++index;
+            }
         }
 
         return new Configuration(configs);
