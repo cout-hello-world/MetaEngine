@@ -18,7 +18,7 @@ public class UCI {
     }
 
     private static enum State {
-        BEFORE_UCI, AFTER_UCI, INITIALIZED
+        BEFORE_UCI, AFTER_UCI
     }
 
     private void printEngineOptions(PrintStream out) {
@@ -62,7 +62,6 @@ public class UCI {
 
             String cmd = tokens[0];
 
-
             switch (state) {
             case BEFORE_UCI:
                 if (cmd.equals("uci")) {
@@ -81,12 +80,6 @@ public class UCI {
                 } else if (cmd.equals("isready")) {
                     engines.synchronizeAll();
                     out.println("readyok");
-                    state = State.INITIALIZED;
-                }
-                break;
-            case INITIALIZED:
-                if (cmd.equals("quit")) {
-                    loop = false;
                 } else if (cmd.equals("go")) {
                     Future<UCIMove> searchFuture =
                         engines.search(new UCIGo(tokens));
@@ -104,9 +97,16 @@ public class UCI {
                     engines.setPosition(new UCIPosition(tokens));
                 } else if (cmd.equals("ucinewgame")) {
                     engines.ucinewgameAll();
-                } else if (cmd.equals("isready")) {
-                    engines.synchronizeAll();
-                    out.println("readyok");
+                } else if (cmd.equals("debug")) {
+                    if (tokens.length > 1) {
+                        if (tokens[1].equals("on")) {
+                            ProcessIO.debug.set();
+                        } else if (tokens[1].equals("off")) {
+                            ProcessIO.debug.clear();
+                        }
+                    } else {
+                        ProcessIO.debug.toggle();
+                    }
                 }
                 break;
             }

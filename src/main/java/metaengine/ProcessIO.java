@@ -8,7 +8,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 public class ProcessIO {
-    private static final boolean DEBUG_WRITES = true;
+    public static final AtomicBit debug = new AtomicBit();
+    private static final boolean DEBUG_WRITES = false;
     private static final boolean DEBUG_READS = false;
     private final Object readMutex = new Object();
     private final BufferedReader fromProc;
@@ -45,9 +46,12 @@ public class ProcessIO {
         synchronized (writeMutex) {
             toProc.println(line);
         }
+        String toPrint = ">" + name + ": " + line;
         if (DEBUG_WRITES) {
-            String toPrint = ">" + name + ": " + line;
             System.err.println(toPrint);
+        }
+        if (debug.get()) {
+            System.out.println("info string " + toPrint);
         }
     }
 }
