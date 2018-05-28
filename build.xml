@@ -2,7 +2,7 @@
 <project xmlns:ivy="antlib:org.apache.ivy.ant"
   name="MetaEngine" default="jar">
     <property name="debuglevel" value="source,lines"/>
-    <property name="version" value="0.2.0"/>
+    <property name="version" value="0.3.0-SNAPSHOT"/>
     <property name="package" value="metaengine"/>
     <property name="src" location="src"/>
     <property name="target" location="target"/>
