@@ -1,7 +1,7 @@
 package metaengine;
 
 public class IDInfo {
-    private static final String version = "v0.2.0-SNAPSHOT";
+    private static final String version = "v0.2.0";
     public static String getName() {
         return "MetaEngine " + version;
     }

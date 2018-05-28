@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project xmlns:ivy="antlib:org.apache.ivy.ant"
   name="MetaEngine" default="jar">
-    <property name="debug" value="true"/>
-    <property name="version" value="0.2.0-SNAPSHOT"/>
+    <property name="debuglevel" value="source,lines"/>
+    <property name="version" value="0.2.0"/>
     <property name="package" value="metaengine"/>
     <property name="src" location="src"/>
     <property name="target" location="target"/>
@@ -34,7 +34,8 @@
         <depend srcdir="${main-src}" destdir="${main-target}" closure="true"
           cache="${depcache}"/>
         <javac includeantruntime="false"
-          srcdir="${main-src}" destdir="${main-target}" debug="${debug}">
+          srcdir="${main-src}" destdir="${main-target}"
+          debug="true" debuglevel="${debuglevel}">
             <classpath refid="main-dep-path"/>
         </javac>
     </target>
@@ -71,7 +72,8 @@
         <depend srcdir="${test-src}" destdir="${test-target}"
           classpath="${main-target}" closure="true" cache="${depcache}"/>
         <javac includeantruntime="false"
-          srcdir="${test-src}" destdir="${test-target}" debug="${debug}">
+          srcdir="${test-src}" destdir="${test-target}"
+          debug="true" debuglevel="${debuglevel}">
             <classpath location="${main-target}"/>
             <classpath refid="test-dep-path"/>
         </javac>
