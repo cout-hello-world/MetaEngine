@@ -1,2 +1,2 @@
 #!/bin/sh
-java -jar target/MetaEngine-0.2.0.jar "$@"
+java -jar target/MetaEngine-0.3.0-SNAPSHOT.jar "$@"

@@ -14,6 +14,7 @@ public class UCIEngine {
     private final String engineName;
     private List<UCIOption> options = null;
     private final ProcessIO engineIO;
+    private final Configuration.EngineConfiguration ec;
 
     private static final String NULL_READLINE_MESSAGE =
         "Unexpected EOF when reading from engine";
@@ -34,6 +35,19 @@ public class UCIEngine {
         engineIO = new ProcessIO(engineProcess, engineName +
                                                 "(" + engineIndex + ")");
         populateOptions();
+        this.ec = ec;
+    }
+
+    public int getIndex() {
+        return ec.getIndex();
+    }
+
+    public EngineRoles getRoles() {
+        return ec.getEngineRoles();
+    }
+
+    public int getBias() {
+        return ec.getBias();
     }
 
     private static List<String> fileToArgv(File file) {

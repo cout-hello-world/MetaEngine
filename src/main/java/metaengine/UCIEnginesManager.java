@@ -17,9 +17,9 @@ public class UCIEnginesManager {
     private static final boolean DEBUG = false;
 
     // Member variables
-    private final List<EngineRecord> enginesList;
-    private final List<EngineRecord> recomenderRecords = new ArrayList<>();
-    private final List<EngineRecord> judgeRecords = new ArrayList<>();
+    private final List<UCIEngine> enginesList;
+    private final List<UCIEngine> generators = new ArrayList<>();
+    private final List<UCIEngine> evaluators = new ArrayList<>();
     private UCIPosition currentPosition = UCIPosition.STARTPOS;
 
     public static UCIEnginesManager create(Configuration conf)
@@ -28,18 +28,16 @@ public class UCIEnginesManager {
             List<Configuration.EngineConfiguration> engineConfigs =
                 conf.getEngineConfigurations();
 
-            List<Future<EngineRecord>> futureEngines =
-              new ArrayList<Future<EngineRecord>>();
+            List<Future<UCIEngine>> futureEngines = new ArrayList<>();
             for (Configuration.EngineConfiguration engineConf : engineConfigs) {
-                Callable<EngineRecord> constructEngine = () -> {
-                    return new EngineRecord(new UCIEngine(engineConf),
-                                            engineConf);
+                Callable<UCIEngine> constructEngine = () -> {
+                    return new UCIEngine(engineConf);
                 };
                 futureEngines.add(Main.threadPool.submit(constructEngine));
             }
 
-            List<EngineRecord> engines = new ArrayList<EngineRecord>();
-            for (Future<EngineRecord> future : futureEngines) {
+            List<UCIEngine> engines = new ArrayList<>();
+            for (Future<UCIEngine> future : futureEngines) {
                 engines.add(future.get());
             }
 
@@ -51,60 +49,37 @@ public class UCIEnginesManager {
         }
     }
 
-    private static class EngineRecord {
-        private final UCIEngine engine;
-        private final Configuration.EngineConfiguration conf;
-        public EngineRecord(UCIEngine engine, Configuration.EngineConfiguration config) {
-            this.engine = engine;
-            this.conf = config;
-        }
-
-        public UCIEngine getEngine() {
-            return engine;
-        }
-
-        public int getIndex() {
-            return conf.getIndex();
-        }
-
-        public Configuration.EngineConfiguration getConfig() {
-            return conf;
-        }
-    }
-
-    private UCIEnginesManager(List<EngineRecord> toManage)
+    private UCIEnginesManager(List<UCIEngine> toManage)
       throws InvalidConfigurationException {
         enginesList = toManage;
-         for (EngineRecord rec : enginesList) {
-             EngineRoles roles = rec.getConfig().getEngineRoles();
+         for (UCIEngine engine : enginesList) {
+             EngineRoles roles = engine.getRoles();
              if (roles.isRecomender()) {
-                 recomenderRecords.add(rec);
+                 generators.add(engine);
              }
              if (roles.isJudge()) {
-                 judgeRecords.add(rec);
+                 evaluators.add(engine);
              }
          }
 
-        if (recomenderRecords.size() != judgeRecords.size()) {
+        if (generators.size() != evaluators.size()) {
             throw new InvalidConfigurationException(
-              "There must be the same number of generators as selectors");
+              "There must be the same number of generators as evaluators");
         }
     }
 
     public List<UCIOptionBundle> getUCIOptions() {
         List<UCIOptionBundle> ret = new ArrayList<UCIOptionBundle>();
-        for (EngineRecord rec : enginesList) {
-            UCIEngine engine = rec.getEngine();
+        for (UCIEngine engine : enginesList) {
             ret.add(new UCIOptionBundle(engine.getOptions(),
-              engine.getName(), rec.getIndex()));
+              engine.getName(), engine.getIndex()));
         }
         return ret;
     }
 
     public void dispatchOption(SetoptionInfo setoptionInfo) {
-        for (EngineRecord rec : enginesList) {
-            if (rec.getIndex() == setoptionInfo.getEngineIndex()) {
-                UCIEngine engine = rec.getEngine();
+        for (UCIEngine engine : enginesList) {
+            if (engine.getIndex() == setoptionInfo.getEngineIndex()) {
                 List<UCIOption> opts = engine.getOptions();
                 for (UCIOption opt : opts) {
                     if (opt.getName().equals(setoptionInfo.getNameString())) {
@@ -136,7 +111,7 @@ public class UCIEnginesManager {
                 if (DEBUG) {
                     System.err.println("DEBUG: timerGo: " + timerGo.toString());
                 }
-                UCIEngine timerEngine = recomenderRecords.get(0).getEngine();
+                UCIEngine timerEngine = generators.get(0);
 
                 Future<GoResult> timerFuture = Main.threadPool.submit(() -> {
                     return timerEngine.go(timerGo);
@@ -144,66 +119,64 @@ public class UCIEnginesManager {
                 long timerStart = System.nanoTime();
 
                 boolean firstIter = true;
-                List<Future<GoResult>> recommenderFutures = new ArrayList<>();
-                for (EngineRecord rec : recomenderRecords) {
+                List<Future<GoResult>> generatorFutures = new ArrayList<>();
+                for (UCIEngine engine : generators) {
                     if (firstIter) {
                         firstIter = false;
                         continue;
                     }
-                    Configuration.EngineConfiguration conf = rec.getConfig();
-                    UCIEngine engine = rec.getEngine();
-                    recommenderFutures.add(Main.threadPool.submit(() -> {
+                    generatorFutures.add(Main.threadPool.submit(() -> {
                         return engine.go(UCIGo.INFINITE);
                     }));
                 }
-                List<GoResult> recResults = new ArrayList<>();
-                recResults.add(timerFuture.get());
+                List<GoResult> generatorResults = new ArrayList<>();
+                generatorResults.add(timerFuture.get());
                 long timerTime = System.nanoTime() - timerStart;
-                for (EngineRecord rec : recomenderRecords) {
-                    rec.getEngine().stop();
+                for (UCIEngine engine : generators) {
+                    engine.stop();
                 }
-                for (Future<GoResult> fut : recommenderFutures) {
-                    recResults.add(fut.get());
+                for (Future<GoResult> fut : generatorFutures) {
+                    generatorResults.add(fut.get());
                 }
 
                 // It must be the case that
-                // recomenderRecords.length == judgeRecords.length
-                // Get judge scores with searchmoves
-                List<Future<GoResult>> judgeFutures = new ArrayList<>();
-                for (int i = 0; i != judgeRecords.size(); ++i) {
-                    UCIEngine judge = judgeRecords.get(i).getEngine();
+                // generators.length() == evaluators.length()
+                // Get evaluator scores with searchmoves
+                List<Future<GoResult>> evaluatorFutures = new ArrayList<>();
+                for (int i = 0; i != evaluators.size(); ++i) {
+                    UCIEngine evaluator = evaluators.get(i);
                     String[] goCtorParam = {
                         "go", "movetime",
                         Long.toString(UCIUtils.convertTimerTime(timerTime))
                     };
-                    UCIPosition judgePosition =
-                        currentPosition.plus(recResults.get(i).getMove());
-                    judgeFutures.add(Main.threadPool.submit(() -> {
-                        judge.position(judgePosition);
-                        return judge.go(new UCIGo(goCtorParam));
+                    UCIPosition evaluatorPosition =
+                        currentPosition.plus(generatorResults.get(i).getMove());
+                    evaluatorFutures.add(Main.threadPool.submit(() -> {
+                        evaluator.position(evaluatorPosition);
+                        return evaluator.go(new UCIGo(goCtorParam));
                     }));
                 }
 
-                List<GoResult> judgeResults = new ArrayList<>();
-                for (Future<GoResult> fut : judgeFutures) {
-                    judgeResults.add(fut.get());
+                List<GoResult> evaluatorResults = new ArrayList<>();
+                for (Future<GoResult> fut : evaluatorFutures) {
+                    evaluatorResults.add(fut.get());
                 }
 
                 int bestIndex = 0;
                 GoResult.Score bestScore =
                     new GoResult.Score(Integer.MIN_VALUE);
-                for (int i = 0; i != judgeResults.size(); ++i) {
+                for (int i = 0; i != evaluatorResults.size(); ++i) {
                     GoResult.Score origScore =
-                        judgeResults.get(i).getScore().flip();
+                        evaluatorResults.get(i).getScore().flip();
                     GoResult.Score score = origScore.getBiasedScore(
-                        recomenderRecords.get(i).getConfig().getBias());
+                        generators.get(i).getBias());
                     if (score.compareTo(bestScore) >= 0) {
                         bestScore = score;
                         bestIndex = i;
                     }
                 }
 
-                return recResults.get(bestIndex).getMove();
+                return generatorResults.get(bestIndex).getMove();
             } catch (Exception e) { // TODO: Real exception handling?
                 throw new RuntimeException(
                     "Unexpected Exception in Searcher.run()", e);
@@ -212,33 +185,31 @@ public class UCIEnginesManager {
     }
 
     public void setPosition(UCIPosition pos) {
-        for (EngineRecord rec : enginesList) {
-            UCIEngine engine = rec.getEngine();
+        for (UCIEngine engine : enginesList) {
             engine.position(pos);
         }
         currentPosition = pos;
     }
-
 
     public Future<UCIMove> search(UCIGo params) {
         return Main.threadPool.submit(new Searcher(params));
     }
 
     public void synchronizeAll() {
-        for (EngineRecord rec : enginesList) {
-            rec.getEngine().synchronize();
+        for (UCIEngine engine : enginesList) {
+            engine.synchronize();
         }
     }
 
     public void ucinewgameAll() {
-        for (EngineRecord rec : enginesList) {
-            rec.getEngine().sendUcinewgame();
+        for (UCIEngine engine : enginesList) {
+            engine.sendUcinewgame();
         }
     }
 
     public void quitAll() {
-        for (EngineRecord rec : enginesList) {
-            rec.getEngine().quit();
+        for (UCIEngine engine : enginesList) {
+            engine.quit();
         }
     }
 }

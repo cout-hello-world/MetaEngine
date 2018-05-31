@@ -39,6 +39,10 @@ public class ProcessIO {
             String toPrint = "<" + name + ": " + result;
             System.err.println(toPrint);
         }
+        if (debug.get()) {
+            String toPrint = "<" + name + ": " + result;
+            System.out.println("info string " + toPrint);
+        }
         return result;
     }
 
