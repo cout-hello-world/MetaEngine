@@ -139,6 +139,21 @@ public class UCIEnginesManager {
                     generatorResults.add(fut.get());
                 }
 
+
+                // Optimize the case where all generators agree
+                boolean allTheSame = true;
+                for (int i = 1; i < generatorResults.size(); ++i) {
+                    UCIMove current = generatorResults.get(i).getMove();
+                    UCIMove last = generatorResults.get(i - 1).getMove();
+                    if (!current.equals(last)) {
+                        allTheSame = false;
+                        break;
+                    }
+                }
+                if (allTheSame) {
+                    return generatorResults.get(0).getMove();
+                }
+
                 // It must be the case that
                 // generators.length() == evaluators.length()
                 // Get evaluator scores with searchmoves

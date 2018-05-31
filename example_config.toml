@@ -14,7 +14,7 @@
     roles = ["GENERATOR", "EVALUATOR"]
 
 [[engine]]
-    argv = ["lczero", "-w", "weights-330.txt"]
+    argv = ["lczero", "-w", "weights-359.txt"]
     # dir is the directory from which to execute this engine.
     # The default is the current directory
     dir = "/home/henry/weights"
